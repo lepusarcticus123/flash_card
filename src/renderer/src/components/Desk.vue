@@ -10,9 +10,8 @@
 .desk {
     width: 90%;
     height: max(14vh, 50px);
-    margin: 2vh auto;
     float: left;
-    /* background-color: #f9f9f9; */
+    margin: 1vh 5vw;
     padding: 1vh;
     border-radius: 3px;
     backdrop-filter: blur(50px);
@@ -20,6 +19,6 @@
 }
 
 .desk:hover {
-    transform: scale(1.05);
+    transform: scale(1.01);
 }
 </style>
