@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, shell, Menu } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -13,16 +13,18 @@ const menuItems = [
         click: () => {
           app.quit() // 点击 "Quit" 菜单项时退出应用
         }
-      }
+      },
+      { role: 'close' },
+      { role: 'reload' }
     ]
   },
   {
     label: 'More',
     submenu: [
       {
-        label: 'more',
-        click: () => {
-          shell.openExternal('https://github.com/') // 点击 "more" 菜单项时输出 "more" 到控制台
+        label: 'Source Code',
+        click: async () => {
+          await shell.openExternal('https://github.com/lepusarcticus123/flash_card') // 点击 "more" 菜单项时输出 "more" 到控制台
         }
       },
       { type: 'separator' }
@@ -41,6 +43,7 @@ function createWindow() {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+    backgroundColor: 'grey',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
