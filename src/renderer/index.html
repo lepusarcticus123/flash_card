@@ -6,16 +6,20 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:"
     />
   </head>
 
   <body>
     <div id="app"></div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Londrina+Sketch&family=Nabla&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Spicy+Rice&display=swap');
+
   html,
   body {
     margin: 0;
