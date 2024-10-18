@@ -10,12 +10,13 @@ const store = createStore({
       state.desks = desks
     },
     addDesk(state, desk) {
+      console.log(state)
       state.desks.push(desk)
     }
   },
   actions: {
     loadDesks({ commit }) {
-      const request = window.indexedDB.open('flashcard', 2)
+      const request = window.indexedDB.open('FlashCard', 2)
 
       request.onsuccess = function (event) {
         const db = event.target.result
@@ -41,8 +42,8 @@ const store = createStore({
       }
     },
 
-    addDesk({ commit }, desk) {
-      const request = window.indexedDB.open('flashcard', 2)
+    addDesk({ commit }, deskName) {
+      const request = window.indexedDB.open('FlashCard', 2)
 
       request.onerror = function () {
         console.log('数据库打开失败')
@@ -57,12 +58,15 @@ const store = createStore({
         const formattedDate = `M:${date.getMonth() + 1} D:${date.getDate()}`
 
         // 添加新的 desk 数据
-        const addRequest = objectStore.add({ name: desk, createdAt: formattedDate })
+        const addRequest = objectStore.add({ name: deskName, createdAt: formattedDate })
 
-        addRequest.onsuccess = function () {
+        addRequest.onsuccess = function (event) {
+          const deskId = event.target.result // 获取生成的 deskID
+          console.log('deskId:', deskId)
           console.log('添加 desk 成功')
-          // 成功后，将新 desk 提交给 Vuex 的 state
-          commit('addDesk', { name: desk, createdAt: formattedDate })
+
+          // 成功后，将新 desk 提交给 Vuex 的 state，包括 deskId
+          commit('addDesk', { id: deskId, name: deskName, createdAt: formattedDate })
         }
 
         addRequest.onerror = function () {
