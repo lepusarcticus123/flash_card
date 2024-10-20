@@ -13,7 +13,6 @@ const save = () => {
     // 这里可以添加保存逻辑
 }
 const search = () => {
-
 }
 const result = reactive({ value: null }) // 使用对象包装，以便跟踪反应式
 </script>

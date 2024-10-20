@@ -22,7 +22,8 @@ const add = () => {
     <div class="add box" @click="add">Add</div>
     <Study :name="desk.name" :id="desk.id"></Study>
     <CardDisplay :id="desk.id"></CardDisplay>
-
+    <div>import </div>
+    <div>export</div>
 </template>
 <style>
 .box {
