@@ -1,5 +1,6 @@
 // src/store/index.js
 import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
 
 const store = createStore({
   state: {
@@ -14,6 +15,7 @@ const store = createStore({
       state.desks.push(desk)
     }
   },
+  plugins: [createPersistedState()],
   actions: {
     loadDesks({ commit }) {
       const request = window.indexedDB.open('FlashCard', 2)

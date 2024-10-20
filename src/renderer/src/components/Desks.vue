@@ -5,18 +5,24 @@ onMounted(() => {
     store.dispatch('loadDesks');
 })
 const desks = computed(() => store.state.desks);
-console.log('desks', desks)
 </script>
 <template>
     <div v-for="desk in desks" key="desk.name">
-        <div class="desk" @click="study">
-            <div id="title">{{ desk.name }}</div>
-            <div id="description">This Is A Description </div>
-        </div>
+        <router-link :to="`/desk/${desk.id}`">
+            <div class="desk" @click="study">
+                <div id="title">{{ desk.name }}</div>
+                <div id="description">This Is A Description </div>
+            </div>
+        </router-link>
+
     </div>
 
 </template>
 <style scoped>
+a {
+    text-decoration: none;
+}
+
 .desk {
     width: 85%;
     height: max(14vh, 50px);
@@ -25,10 +31,10 @@ console.log('desks', desks)
     transition: all 0.3s ease-in-out;
     cursor: pointer;
     border-radius: 5px;
-    color: var(--font);
+    color: var(--sep);
     position: relative;
     overflow: hidden;
-    background-color: var(--desk);
+    background-color: var(--bt);
     font-family: "Playfair Display", sans-serif;
 }
 

@@ -1,5 +1,4 @@
 <script setup>
-import Top from './Top.vue'
 import Bannner from './Bannner.vue'
 import Desks from './Desks.vue'
 import Bottom from './Bottom.vue'
@@ -74,7 +73,6 @@ request.onupgradeneeded = function (event) {
 </script>
 <template>
     <div class="wrapper"></div>
-    <Top />
     <Bannner />
     <div class="main">
         <!-- 渲染 desks 列表 -->
@@ -83,6 +81,14 @@ request.onupgradeneeded = function (event) {
     <Bottom />
 </template>
 <style>
+.wrapper {
+    background-color: var(--bg);
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    z-index: -1;
+}
+
 .main {
     width: 90%;
     padding-top: 0.5vh;

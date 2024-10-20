@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue';
+import Top from './components/Top.vue';
 const ThemeName = ref('default');
 </script>
 
 <template>
   <div :class="ThemeName"> <!-- 修正 class 绑定 -->
+    <Top />
     <router-view></router-view>
   </div>
 </template>
@@ -16,7 +18,6 @@ const ThemeName = ref('default');
   --font: white;
   --sep: #112d4e;
   --bt: white;
-  --desk: rgba(17, 45, 78, 0.5);
 }
 
 .dark {
@@ -33,11 +34,4 @@ const ThemeName = ref('default');
   --font: white
 }
 
-.wrapper {
-  background-color: var(--bg);
-  position: fixed;
-  height: 100vh;
-  width: 100vw;
-  z-index: -1;
-}
 </style>
