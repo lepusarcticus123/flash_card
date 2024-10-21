@@ -5,8 +5,9 @@
  *
  * @param {*} deskId
  */
+// const version = await window.func.getversion()
 const exportData = (deskId) => {
-  const request = indexedDB.open('FlashCard', 2)
+  const request = indexedDB.open('FlashCard', 1)
   const batchSize = 100
 
   request.onsuccess = (event) => {

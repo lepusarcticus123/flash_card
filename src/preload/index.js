@@ -30,5 +30,9 @@ contextBridge.exposeInMainWorld('func', {
   upload: async () => {
     const path = await ipcRenderer.invoke('setFile')
     console.log(path)
+  },
+  getversion: async () => {
+    const version = await ipcRenderer.invoke('get-app-version')
+    return version // 返回获取到的版本
   }
 })

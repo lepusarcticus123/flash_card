@@ -4,7 +4,10 @@ import { store } from '../store';
 import router from '../router';
 import Study from './Study.vue';
 import CardDisplay from './CardDisplay.vue';
+import loadData from '../utills/LoadData';
+import { reactive } from 'vue';
 const route = useRoute()
+const data = reactive([])
 const desk = store.state.desks.find((desk) => desk.id == route.params.id)
 const back = () => {
     window.location.href = '/'
@@ -12,6 +15,15 @@ const back = () => {
 const add = () => {
     router.push(`/desk/${route.params.id}/add`)
 }
+const loadCards = async () => {
+    try {
+        data = await loadData(props.id);
+    }
+    catch {
+        console.log("loadCards error")
+    }
+}
+loadCards()
 </script>
 <template>
 
@@ -20,10 +32,8 @@ const add = () => {
         <div>Back</div>
     </div>
     <div class="add box" @click="add">Add</div>
-    <Study :name="desk.name" :id="desk.id"></Study>
-    <CardDisplay :id="desk.id"></CardDisplay>
-    <div>import </div>
-    <div>export</div>
+    <Study :name="desk.name" :id="desk.id" :data="data"></Study>
+    <CardDisplay :id="desk.id" :data="data"></CardDisplay>
 </template>
 <style>
 .box {

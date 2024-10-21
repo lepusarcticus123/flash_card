@@ -7,13 +7,14 @@
  *
  * @param {*} file
  */
+// const version = await window.func.getversion()
 const importData = (file) => {
   const reader = new FileReader()
   const batchSize = 100 // 每次导入100条数据
 
   reader.onload = (event) => {
     const data = JSON.parse(event.target.result)
-    const request = indexedDB.open('FlashCard', 2)
+    const request = indexedDB.open('FlashCard', 1)
 
     request.onsuccess = (event) => {
       const db = event.target.result

@@ -33,5 +33,4 @@ const ThemeName = ref('default');
   --main: #FFFFFF;
   --font: white
 }
-
 </style>

@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { type } from 'os'
+require('dotenv').config()
 
 const menuItems = [
   {
@@ -96,4 +97,7 @@ ipcMain.on('getFile', () => {
 ipcMain.handle('setFile', async (event) => {
   const obj = await dialog.showOpenDialog({})
   return obj.filePaths
+})
+ipcMain.handle('get-app-version', () => {
+  return process.env.VERSION
 })

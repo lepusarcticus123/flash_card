@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
-const props = defineProps(['id'])
+const props = defineProps(['id', 'data'])
 </script>
 <template>
     <div class="container">

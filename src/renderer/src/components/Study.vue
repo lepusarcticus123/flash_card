@@ -1,22 +1,32 @@
 <script setup>
-import { defineProps } from 'vue';
-const props = defineProps(['id', 'name']
-)
-const request = indexedDB.open('FlashCard', 2)
+import { defineProps, reactive, ref } from 'vue';
+import router from '../router';
 
+const props = defineProps(['id', 'name', 'data']);
+const total = ref(0)
+const review = ref(0)
+const notStudied = ref(0)
+
+const study = () => {
+    router.push({ path: '/desk/' + props.id + '/study' });
+};
+total.value = props.data.length
+review.value = props.data.filter((item) => item.reviewCount > 0).length
+notStudied.value = props.data.filter(item => item.reviewCount == 0).length
 </script>
+
 <template>
     <div class="study">
         <div class="title">{{ name }}</div>
         <p>Cards For Today😳</p>
         <div class="info">
-            <div class="number">0</div>
+            <div class="number">{{ total }}</div>
             <div class="container">
-                <div>🔎0</div>
+                <div>🔎{{ notStudied }}</div>
                 <p>Not Studied</p>
             </div>
             <div class="container">
-                <div>✨10</div>
+                <div>✨{{ review }}</div>
                 <p>To Review</p>
             </div>
 

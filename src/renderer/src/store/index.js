@@ -1,7 +1,6 @@
 // src/store/index.js
 import { createStore } from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-
 const store = createStore({
   state: {
     desks: []
@@ -17,8 +16,9 @@ const store = createStore({
   },
   plugins: [createPersistedState()],
   actions: {
-    loadDesks({ commit }) {
-      const request = window.indexedDB.open('FlashCard', 2)
+    async loadDesks({ commit }) {
+      const version = await window.func.getversion()
+      const request = window.indexedDB.open('FlashCard', version)
 
       request.onsuccess = function (event) {
         const db = event.target.result
@@ -44,8 +44,9 @@ const store = createStore({
       }
     },
 
-    addDesk({ commit }, deskName) {
-      const request = window.indexedDB.open('FlashCard', 2)
+    async addDesk({ commit }, deskName) {
+      const version = await window.func.getversion()
+      const request = window.indexedDB.open('FlashCard', version)
 
       request.onerror = function () {
         console.log('数据库打开失败')
