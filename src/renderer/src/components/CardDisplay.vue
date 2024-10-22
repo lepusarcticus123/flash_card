@@ -1,6 +1,31 @@
 <script setup>
 import { defineProps } from 'vue';
 const props = defineProps(['id', 'data'])
+//删除
+const remove = async (id) => {
+    const version = await window.func.getversion();
+    const request = window.indexedDB.open('FlashCard', version);
+
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(['cards'], 'readwrite');
+        const objectStore = transaction.objectStore('cards');
+
+        const deleteRequest = objectStore.delete(id);
+
+        deleteRequest.onsuccess = () => {
+            console.log(`Card with id ${id} deleted successfully.`);
+        };
+
+        deleteRequest.onerror = (event) => {
+            console.error(`Error deleting card with id ${id}:`, event.target.error);
+        };
+    };
+
+    request.onerror = (event) => {
+        console.error('Database open error:', event.target.error);
+    };
+};
 </script>
 <template>
     <div class="container">
@@ -10,7 +35,7 @@ const props = defineProps(['id', 'data'])
                 <p id="meaning">lepus is hshfhsfnskfhshfiuahsfhnsjhk</p>
             </div>
 
-            <div id="delete" @click="delete">Delete</div>
+            <div id="delete" @click="remove(i)">Delete</div>
         </div>
 
     </div>
@@ -30,8 +55,8 @@ const props = defineProps(['id', 'data'])
 }
 
 #delete:hover {
-    background-color: var(--head);
-    color: var(--bt);
+    background-color: var(--sep);
+    color: var(--main);
 }
 
 .container {
@@ -48,6 +73,7 @@ const props = defineProps(['id', 'data'])
     align-items: center;
     padding: 1px;
     margin: 1vh;
+    color: var(--sep);
     background-color: var(--bg);
     border-radius: 5px;
 }

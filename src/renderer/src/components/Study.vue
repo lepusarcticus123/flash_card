@@ -51,7 +51,7 @@ notStudied.value = props.data.filter(item => item.reviewCount == 0).length
 }
 
 #study:hover {
-    background-color: var(--head);
+    background-color: var(--sep);
     color: var(--bt);
 }
 

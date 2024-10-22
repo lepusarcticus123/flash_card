@@ -101,3 +101,39 @@ ipcMain.handle('setFile', async (event) => {
 ipcMain.handle('get-app-version', () => {
   return process.env.VERSION
 })
+ipcMain.handle('fetch-data', async (event, word) => {
+  const prompt = {
+    model: 'generalv3.5',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a helpful assistant. Give me the meaning of the word that I input.'
+      },
+      {
+        role: 'user',
+        content: word
+      }
+    ],
+    stream: false,
+    max_tokens: 1024,
+    temperature: 0.9,
+    top_p: 0.7
+  }
+  const password = process.env.XF_PASSWORD // 替换为获取到的密码
+  try {
+    const response = await fetch('https://spark-api-open.xf-yun.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${password}`
+      },
+      body: prompt
+    })
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Fetch failed', error)
+    return null
+  }
+})

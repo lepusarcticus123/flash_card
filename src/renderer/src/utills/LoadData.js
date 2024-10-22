@@ -6,11 +6,11 @@
  * @param {*} deskId
  * @returns {*}
  */
-// const version = await window.func.getversion()
-const loadData = (deskId) => {
+const loadData = async (deskId) => {
+  const version = await window.api.getversion()
   return new Promise((resolve, reject) => {
     const data = []
-    const request = window.indexedDB.open('FlashCard', 1)
+    const request = window.indexedDB.open('FlashCard', version)
 
     request.onsuccess = (event) => {
       const db = event.target.result

@@ -21,6 +21,7 @@ const flashCards = ref(10);
     border-radius: 2px;
     font-size: 6vh;
     text-align: center;
+    color: var(--sep);
     font-family: "Londrina Sketch", sans-serif;
 }
 

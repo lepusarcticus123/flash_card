@@ -6,7 +6,7 @@ import Bottom from './Bottom.vue'
 // indexedDB.deleteDatabase('FlashCard');  // 删除数据库
 //数据库初始化
 const openDB = async () => {
-    const version = await window.func.getversion();
+    const version = await window.api.getversion();
     const request = window.indexedDB.open('FlashCard', version); // 指定数据库版本
     // 处理数据库打开失败
     request.onerror = function () {
@@ -90,6 +90,8 @@ openDB()
 .wrapper {
     background-color: var(--bg);
     position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
     width: 100vw;
     z-index: -1;

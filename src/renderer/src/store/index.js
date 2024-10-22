@@ -3,7 +3,9 @@ import { createStore } from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 const store = createStore({
   state: {
-    desks: []
+    desks: [],
+    theme: 'default',
+    level: 'intermediate'
   },
   mutations: {
     setDesks(state, desks) {
@@ -12,12 +14,18 @@ const store = createStore({
     addDesk(state, desk) {
       console.log(state)
       state.desks.push(desk)
+    },
+    setTheme(state, theme) {
+      state.theme = theme
+    },
+    setLevel(state, level) {
+      state.level = level
     }
   },
   plugins: [createPersistedState()],
   actions: {
     async loadDesks({ commit }) {
-      const version = await window.func.getversion()
+      const version = await window.api.getversion()
       const request = window.indexedDB.open('FlashCard', version)
 
       request.onsuccess = function (event) {
@@ -45,7 +53,7 @@ const store = createStore({
     },
 
     async addDesk({ commit }, deskName) {
-      const version = await window.func.getversion()
+      const version = await window.api.getversion()
       const request = window.indexedDB.open('FlashCard', version)
 
       request.onerror = function () {

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-
+import router from '../router';
 const completed = ref(true)
 const time = ref(1)
 const date = ref(new Date())
@@ -17,6 +17,9 @@ onMounted(() => {
         clearInterval(timer)
     })
 })
+const edit = () => {
+    router.push('/edit')
+}
 </script>
 
 <template>
@@ -27,7 +30,7 @@ onMounted(() => {
             <span>{{ time }} day</span>
         </div>
         <div class="time">{{ now_time }}</div> <!-- 动态显示当前时间 -->
-        <div class="theme">⚙️</div>
+        <div class="theme" @click="edit">⚙️</div>
     </div>
 </template>
 

@@ -1,7 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-const api = {}
+const api = {
+  getversion: async () => {
+    const version = await ipcRenderer.invoke('get-app-version')
+    return version // 返回获取到的版本
+  },
+  getdata: async (word) => {
+    const data = await ipcRenderer.invoke('fetch-data', word)
+    return data
+  }
+}
 
 if (process.contextIsolated) {
   try {
@@ -30,9 +39,5 @@ contextBridge.exposeInMainWorld('func', {
   upload: async () => {
     const path = await ipcRenderer.invoke('setFile')
     console.log(path)
-  },
-  getversion: async () => {
-    const version = await ipcRenderer.invoke('get-app-version')
-    return version // 返回获取到的版本
   }
 })

@@ -4,18 +4,26 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+const result = ref('')
 const word = ref('')
+//desk的id
 const id = route.params.id
 const back = () => {
     router.go(-1)
 }
 const save = () => {
-    // 这里可以添加保存逻辑
+    // 保存逻辑
 }
-const search = () => {
-}
-const result = reactive({ value: null }) // 使用对象包装，以便跟踪反应式
+const search = async () => {
+    const data = await window.api.getdata(word.value)
+    if (data) {
+        result.value = data.choices.message.content
+    } else {
+        console.error('No data received.')
+    }
+};
 </script>
+
 
 <template>
     <div class="wrapper"></div>

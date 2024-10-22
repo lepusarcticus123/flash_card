@@ -6,9 +6,10 @@
  * @param {*} id
  */
 // const version = await window.func.getversion()
-const forget = (id) => {
+const forget = async (id) => {
+  const version = await window.func.getversion()
   return newPromise((resolve, reject) => {
-    const request = window.indexedDB.open('FlashCard', 1)
+    const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
@@ -41,9 +42,10 @@ const forget = (id) => {
  *
  * @param {*} id
  */
-const hard = (id) => {
+const hard = async (id) => {
+  const version = await window.func.getversion()
   return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open('FlashCard', 1)
+    const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
@@ -78,9 +80,10 @@ const hard = (id) => {
  *
  * @param {*} id
  */
-const good = (id) => {
+const good = async (id) => {
+  const version = await window.func.getversion()
   return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open('FlashCard', 1)
+    const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
@@ -115,9 +118,10 @@ const good = (id) => {
  *
  * @param {*} id
  */
-const easy = (id) => {
+const easy = async (id) => {
+  const version = await window.func.getversion()
   return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open('FlashCard', 1)
+    const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')

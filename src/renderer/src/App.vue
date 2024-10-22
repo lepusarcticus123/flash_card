@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Top from './components/Top.vue';
-const ThemeName = ref('default');
+import { store } from './store';
+const ThemeName = computed(() => store.state.theme);
 </script>
 
 <template>
@@ -20,17 +21,21 @@ const ThemeName = ref('default');
   --bt: white;
 }
 
-.dark {
-  --bg: #616161;
-  --head: #212121;
-  --main: #d5d5d5;
-  --font: white
+.black {
+  --bg: #646464;
+  --head: #222831;
+  --main: #aeaeae;
+  --font: white;
+  --sep: #fcfcfc;
+  --bt: rgb(113, 113, 113);
 }
 
-.blue {
-  --bg: #03A9F4;
-  --head: #0288D1;
-  --main: #FFFFFF;
-  --font: white
+.pink {
+  --bg: #f5eee6;
+  --head: #e6a4b4;
+  --main: #f3d7ca;
+  --font: white;
+  --sep: #c86b85;
+  --bt: rgb(255, 250, 250);
 }
 </style>

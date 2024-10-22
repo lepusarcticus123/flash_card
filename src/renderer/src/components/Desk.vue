@@ -7,7 +7,7 @@ import CardDisplay from './CardDisplay.vue';
 import loadData from '../utills/LoadData';
 import { reactive } from 'vue';
 const route = useRoute()
-const data = reactive([])
+let data = reactive([])
 const desk = store.state.desks.find((desk) => desk.id == route.params.id)
 const back = () => {
     window.location.href = '/'
@@ -17,10 +17,10 @@ const add = () => {
 }
 const loadCards = async () => {
     try {
-        data = await loadData(props.id);
+        data = await loadData(desk.id);
     }
-    catch {
-        console.log("loadCards error")
+    catch (error) {
+        console.log("loadCards error", error)
     }
 }
 loadCards()
