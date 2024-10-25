@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { type } from 'os'
+import EventSource from 'eventsource'
 require('dotenv').config()
 
 const menuItems = [
@@ -103,37 +104,44 @@ ipcMain.handle('get-app-version', () => {
 })
 ipcMain.handle('fetch-data', async (event, word) => {
   const prompt = {
-    model: 'generalv3.5',
+    model: 'glm-4-flashx',
     messages: [
       {
         role: 'system',
-        content: 'You are a helpful assistant. Give me the meaning of the word that I input.'
+        content: `我是一个初学者，想了解一个特定单词的详细信息。请以全英文格式返回以下内容：
+1. 单词: 我提供的单词。
+2. 音标: 单词的国际音标（IPA）。
+3. 释义: 请为单词的每个意思单独列出，并包含以下信息：
+   - 词性: 单词在该释义下的词性（名词、动词等）。
+   - 释义: 该词义对应的解释。
+   - 示例句: 该词义对应的例句。
+4. 派生词: 请提供常见的派生词（如名词、形容词、动词、反义词等），并包含以下信息：
+   - 词性: 派生词的词性。
+   - 音标: 派生词的国际音标（IPA）。
+   - 释义: 派生词的解释。
+   - 示例句: 该派生词的示例句。
+
+请返回全英文JSON格式，便于我解析这些内容。`
       },
       {
         role: 'user',
         content: word
       }
-    ],
-    stream: false,
-    max_tokens: 1024,
-    temperature: 0.9,
-    top_p: 0.7
+    ]
   }
-  const password = process.env.XF_PASSWORD // 替换为获取到的密码
+  const apiKey = process.env.ZP_PASSWORD
+
   try {
-    const response = await fetch('https://spark-api-open.xf-yun.com/v1/chat/completions', {
+    const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`
+        Authorization: `Bearer ${apiKey}`
       },
-      body: prompt
+      body: JSON.stringify(prompt)
     })
-
-    const data = await response.json()
-    return data
   } catch (error) {
     console.error('Fetch failed', error)
-    return null
+    throw error
   }
 })

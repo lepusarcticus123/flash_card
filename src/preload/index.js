@@ -6,9 +6,17 @@ const api = {
     const version = await ipcRenderer.invoke('get-app-version')
     return version // 返回获取到的版本
   },
+
   getdata: async (word) => {
-    const data = await ipcRenderer.invoke('fetch-data', word)
-    return data
+    try {
+      const result = await ipcRenderer.invoke('fetch-data', word)
+      return result
+    } catch (error) {
+      throw error
+    }
+  },
+  on: (channel, func) => {
+    ipcRenderer.on(channel, (event, ...args) => func(...args))
   }
 }
 

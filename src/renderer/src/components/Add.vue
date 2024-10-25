@@ -1,27 +1,61 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
+import { store } from '../store';
+const level = computed(() => store.state.level)
 const route = useRoute()
 const router = useRouter()
-const result = ref('')
-const word = ref('')
-//desk的id
-const id = route.params.id
+const result = ref('');
+const displayResult = ref('');
+const word = ref('');
+const id = route.params.id;
+
 const back = () => {
     router.go(-1)
 }
+
 const save = () => {
     // 保存逻辑
 }
+
 const search = async () => {
-    const data = await window.api.getdata(word.value)
-    if (data) {
-        result.value = data.choices.message.content
+    if (word.value) {
+        try {
+            await window.api.getdata(word.value);
+        } catch (error) {
+            console.error('Error parsing data:', error);
+        }
     } else {
-        console.error('No data received.')
+        console.log('empty!');
     }
 };
+
+onMounted(() => {
+    window.api.on('data-chunk', (chunk) => {
+        result.value += chunk; // 实时更新流式内容
+        // 逐字显示
+        const characters = chunk.split('');
+        let index = 0;
+        const displayNextCharacter = () => {
+            if (index < characters.length) {
+                displayResult.value += characters[index++];
+                requestAnimationFrame(displayNextCharacter);
+            }
+        };
+        displayNextCharacter();
+        // console.log(chunk)
+    });
+
+    window.api.on('data-complete', (finalResult) => {
+        // result.value = finalResult; // 确保最终结果正确显示
+        console.log(finalResult)
+    });
+
+    window.api.on('error', (errorMessage) => {
+        console.error('Error from main process:', errorMessage);
+    });
+});
+
 </script>
 
 
@@ -30,8 +64,9 @@ const search = async () => {
     <div class="back box" @click="back">
         <div>Back</div>
     </div>
-    <div v-if="result.value">
-        {{ result.value }} <!-- 显示 result 的内容 -->
+    <div v-if="word" class="card">
+        <!-- 这里是流式内容 -->
+        <div v-html="displayResult"></div>
     </div>
     <div v-else class="pretend">
         Let's Give It A Try!
@@ -53,6 +88,30 @@ const search = async () => {
 </template>
 
 <style scoped>
+.card {
+    position: relative;
+    width: 70%;
+    color: var(--sep);
+    font-family: 'Playfair Display';
+    height: 60vh;
+    margin: 10vh auto;
+    background-color: var(--main);
+}
+
+.meanings {}
+
+.sound {
+    cursor: pointer;
+}
+
+.title {
+    font-size: 3vw;
+    width: 50%;
+    display: flex;
+    justify-content: space-between;
+    margin: 1vh auto;
+}
+
 .tips {
     position: absolute;
     bottom: 1vh;
@@ -85,6 +144,8 @@ const search = async () => {
     margin: 10vh auto;
     background-color: var(--main);
 }
+
+
 
 .querybox {
     position: fixed;

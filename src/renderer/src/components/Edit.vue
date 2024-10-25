@@ -37,7 +37,7 @@ const changeLevel = (level) => {
         <div v-if="level" class="level">
             <div class="le" @click="changeLevel('primary')">primary🔮</div>
             <div class="le" @click="changeLevel('intermediate')">intermediate💎</div>
-            <div class="le" @clcik="changeLevel('advanced')">Advanced🪄</div>
+            <div class="le" @click="changeLevel('advanced')">Advanced🪄</div>
         </div>
     </div>
 </template>

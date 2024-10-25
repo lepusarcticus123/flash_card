@@ -25,7 +25,8 @@ const loadCards = async () => {
 }
 loadCards()
 //卡片索引
-// let index=0
+// let index=ref(0)
+//复习操作
 // const forget = () => {
 //     const request = window.indexedDB.open('FlashCard', '1')
 //     request.onsuccess = (event) => {
