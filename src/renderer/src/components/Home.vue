@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import Bannner from './Bannner.vue'
 import Desks from './Desks.vue'
 import Bottom from './Bottom.vue'
@@ -75,7 +76,6 @@ const openDB = async () => {
     };
 }
 openDB()
-
 </script>
 <template>
     <div class="wrapper"></div>

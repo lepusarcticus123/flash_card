@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue'
 import { store } from '../store';
+import { useRouter } from 'vue-router';
 const theme = ref(false)
 const level = ref(false)
+const router = useRouter()
 const back = () => {
-    window.location.href = '/'
+    router.go(-1)
 }
 const themeDrop = () => {
     theme.value = !theme.value
@@ -34,11 +36,11 @@ const changeLevel = (level) => {
             <div id="black" @click="changeTheme('black')">Black</div>
         </div>
         <div class="option" @click="levelDrop">Level</div>
-        <div v-if="level" class="level">
+        <!-- <div v-if="level" class="level">
             <div class="le" @click="changeLevel('primary')">primary🔮</div>
             <div class="le" @click="changeLevel('intermediate')">intermediate💎</div>
             <div class="le" @click="changeLevel('advanced')">Advanced🪄</div>
-        </div>
+        </div> -->
     </div>
 </template>
 <style scoped>

@@ -6,7 +6,6 @@ const level = computed(() => store.state.level)
 const route = useRoute()
 const router = useRouter()
 const result = ref('');
-const displayResult = ref('');
 const word = ref('');
 const id = route.params.id;
 
@@ -17,44 +16,90 @@ const back = () => {
 const save = () => {
     // 保存逻辑
 }
-
 const search = async () => {
-    if (word.value) {
-        try {
-            await window.api.getdata(word.value);
-        } catch (error) {
-            console.error('Error parsing data:', error);
-        }
-    } else {
-        console.log('empty!');
-    }
-};
-
-onMounted(() => {
-    window.api.on('data-chunk', (chunk) => {
-        result.value += chunk; // 实时更新流式内容
-        // 逐字显示
-        const characters = chunk.split('');
-        let index = 0;
-        const displayNextCharacter = () => {
-            if (index < characters.length) {
-                displayResult.value += characters[index++];
-                requestAnimationFrame(displayNextCharacter);
+    result.value = ''
+    const apiKey = await window.api.getApiKey()
+    const prompt = {
+        model: 'glm-4-flashx',
+        messages: [
+            {
+                role: 'system',
+                content: `For each response, focus solely on the current command and ignore previous interactions.想了解一个特定单词的详细信息。请以全英文格式返回以下内容：
+我提供的单词
+phonetic: 单词的国际音标（IPA）。
+definitions: 请为单词的每个意思单独列出，并包含以下信息：
+   - part of speech: 单词在该释义下的词性（名词、动词等）。
+   - definition: 该词义对应的解释。
+   - example sentence: 该词义对应的例句。
+derivatives: 请提供常见的派生词（如名词、形容词、动词、反义词等），并包含以下信息：
+   -  派生词的单词。
+   - part of speech: 派生词的词性。
+   - phonetic: 派生词的国际音标（IPA）。
+   - definition: 派生词的解释。
+   - example sentence: 该派生词的示例句。
+请返回纯文本格式不要使用markdown格式，便于我解析这些内容。`
+            },
+            {
+                role: 'user',
+                content: word.value
             }
-        };
-        displayNextCharacter();
-        // console.log(chunk)
-    });
+        ],
+        stream: true
+    }
 
-    window.api.on('data-complete', (finalResult) => {
-        // result.value = finalResult; // 确保最终结果正确显示
-        console.log(finalResult)
+    const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(prompt)
     });
+    word.value = "";
+    if (!response.body) {
+        console.error("响应体为空");
+        return;
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
 
-    window.api.on('error', (errorMessage) => {
-        console.error('Error from main process:', errorMessage);
-    });
-});
+    let partialData = "";
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // 解码流数据并拼接到partialData
+        partialData += decoder.decode(value, { stream: true });
+
+        // 按行分割数据
+        let lines = partialData.split("\n");
+
+        // 处理每一行，排除最后一行未完成的数据
+        for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i].trim();
+
+            // 排除 [DONE] 行
+            if (line === "data: [DONE]") continue;
+
+            if (line.startsWith("data:")) {
+                try {
+                    const json = JSON.parse(line.slice(5));
+                    const content = json?.choices?.[0]?.delta?.content;
+
+                    // 追加content到buffer中
+                    if (content) result.value += content.replace(/\n/g, '<br>');
+                } catch (error) {
+                    console.error("JSON解析错误:", error);
+                }
+            }
+        }
+
+        // 更新partialData，只保留未完成的部分
+        partialData = lines[lines.length - 1];
+    }
+
+};
 
 </script>
 
@@ -64,10 +109,8 @@ onMounted(() => {
     <div class="back box" @click="back">
         <div>Back</div>
     </div>
-    <div v-if="word" class="card">
-        <!-- 这里是流式内容 -->
-        <div v-html="displayResult"></div>
-    </div>
+    <div v-if="result" class="card" v-html="result"></div>
+
     <div v-else class="pretend">
         Let's Give It A Try!
         <div class="tips">
@@ -90,15 +133,44 @@ onMounted(() => {
 <style scoped>
 .card {
     position: relative;
+    padding-top: 1vh;
+    padding-bottom: 2vw;
     width: 70%;
     color: var(--sep);
+    text-align: center;
     font-family: 'Playfair Display';
     height: 60vh;
     margin: 10vh auto;
     background-color: var(--main);
+    overflow-y: scroll;
 }
 
-.meanings {}
+br {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 2px;
+    line-height: 2vh;
+}
+
+/* 针对 Webkit 浏览器（如 Chrome 和 Safari） */
+.card::-webkit-scrollbar {
+    width: 10px;
+    /* 滚动条的宽度 */
+}
+
+/* 滚动条轨道 */
+.card::-webkit-scrollbar-track {
+    background-color: var(--bt);
+    /* 设置滚动条背景色 */
+}
+
+/* 滚动条滑块 */
+.card::-webkit-scrollbar-thumb {
+    background-color: var(--head);
+    /* 设置滑块颜色 */
+    border: 3px solid var(--main);
+    /* 为滑块添加边框，颜色与背景色一致 */
+}
 
 .sound {
     cursor: pointer;
