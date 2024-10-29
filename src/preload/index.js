@@ -10,6 +10,10 @@ const api = {
   getApiKey: async () => {
     const apiKey = await ipcRenderer.invoke('get-api-key')
     return apiKey
+  },
+  getaudio: async () => {
+    const audio = await ipcRenderer.invoke('fetch-tts')
+    return audio
   }
 }
 

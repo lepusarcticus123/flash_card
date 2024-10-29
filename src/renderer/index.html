@@ -2,11 +2,16 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Flash-card</title>
+    <title>FlashCard</title>
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content=" script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:"
+      content=" script-src 'self' https://code.responsivevoice.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:"
+    />
+    <meta name="author" content="lepusarcticus123" />
+    <meta
+      name="description"
+      content="The APP is designed to help you memorize words and phrases using LLM"
     />
   </head>
 
@@ -14,6 +19,7 @@
     <div id="app"></div>
 
     <script type="module" src="/src/main.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=SYtdTdUZ"></script>
   </body>
 </html>
 <style>

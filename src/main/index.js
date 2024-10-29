@@ -1,10 +1,9 @@
 import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from 'electron'
 import { join } from 'path'
-const http = require('http')
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon2.png?asset'
 import { type } from 'os'
-import EventSource from 'eventsource'
+import axios from 'axios'
 require('dotenv').config()
 
 const menuItems = [
@@ -93,4 +92,28 @@ ipcMain.handle('get-app-version', () => {
 })
 ipcMain.handle('get-api-key', () => {
   return process.env.API_KEY
+})
+ipcMain.handle('fetch-tts', async (event, text) => {
+  try {
+    const response = await axios.get(
+      `https://texttospeech.responsivevoice.org/v1/text:synthesize`,
+      {
+        params: {
+          text: 'hello world',
+          lang: 'en-GB',
+          engine: 'g1',
+          pitch: 0.5,
+          rate: 0.5,
+          volume: 1,
+          key: 'SYtdTdUZ',
+          gender: 'female'
+        },
+        responseType: 'arraybuffer' // 用于返回音频数据
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('TTS request error:', error.message, error.response?.status, error.response?.data)
+    // throw error
+  }
 })

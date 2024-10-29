@@ -76,6 +76,7 @@ const openDB = async () => {
     };
 }
 openDB()
+
 </script>
 <template>
     <div class="wrapper"></div>
