@@ -1,40 +1,75 @@
 <script setup>
-import { defineProps, reactive, ref } from 'vue';
+import { defineProps, watch, ref } from 'vue';
+import { store } from '../store';
 import router from '../router';
 
-const props = defineProps(['id', 'name', 'data']);
+const props = defineProps(['desk', 'data']);
+
 const total = ref(0)
 const review = ref(0)
 const notStudied = ref(0)
 
+const des = ref(props.desk.description)
+
 const study = () => {
-    router.push({ path: '/desk/' + props.id + '/study' });
+    router.push({ path: '/desk/' + props.desk.id + '/study' });
 };
-total.value = props.data.length
-review.value = props.data.filter((item) => item.reviewCount > 0).length
-notStudied.value = props.data.filter(item => item.reviewCount == 0).length
+
+const updateCounts = () => {
+    total.value = props.data.filter((item) => item.nextReviewTime < Date.now())
+    review.value = props.data.filter((item) => item.nextReviewTime < Date.now() && item.reviewCount > 0)
+    notStudied.value = props.data.filter(item => item.reviewCount == 0)
+}
+watch(() => props.data, updateCounts, { immediate: true });
+
 </script>
 
 <template>
     <div class="study">
-        <div class="title">{{ name }}</div>
-        <p>Cards For Today😳</p>
+        <div class="title">
+            <div>{{ desk.name }}</div>
+            <input type="text" v-model="des" @keypress.enter="store.dispatch('changeDes', { id: desk.id, des })"
+                :placeholder="desk.description ? ' - ' + desk.description : 'This is a default description, press enter to change it'">
+
+        </div>
+        <p>
+            <span v-if="total.length > 0">😳</span>
+            <span v-else>🤩</span>Cards For Today
+
+        </p>
         <div class="info">
-            <div class="number">{{ total }}</div>
+            <div class="number">{{ total.length }}</div>
             <div class="container">
-                <div>🔎{{ notStudied }}</div>
+                <div>🔎{{ notStudied.length }}</div>
                 <p>Not Studied</p>
             </div>
             <div class="container">
-                <div>✨{{ review }}</div>
+                <div>✨{{ review.length }}</div>
                 <p>To Review</p>
             </div>
 
         </div>
-        <div id="study" @click="study">Study!🎐</div>
+        <div id="study" @click="study" v-if="total.length > 0">Study!🎐</div>
     </div>
 </template>
 <style scoped>
+.title div {
+    width: 30%;
+    display: inline-block;
+}
+
+.title input {
+    padding: 1vw;
+    font-size: 1.8vw;
+    font-family: 'Playfair Display', sans-serif;
+    border: 0;
+    background-color: var(--main);
+    border-bottom: 1px solid var(--sep);
+    outline: none;
+    display: inline-block;
+    width: 67%;
+}
+
 #study {
     width: 94%;
     margin: 0 auto;

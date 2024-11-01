@@ -1,10 +1,13 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { store } from '../store';
 import router from '../router';
-const completed = ref(true)
-const time = ref(1)
+const lastCompletedDate = computed(() => store.state.lastCompletedDate)
+const streak = computed(() => store.state.streak)
 const date = ref(new Date())
 const now_time = ref(date.value.toString().split(' ')[4])
+const today = new Date().toISOString().slice(0, 10)// 格式化为 "YYYY/MM/DD"
+const completed = computed(() => store.dispatch('checkCompleted'))
 
 // 定时更新时间
 onMounted(() => {
@@ -25,9 +28,9 @@ const edit = () => {
 <template>
     <div class="head">
         <div class="day">
-            <span v-if="completed">🎉</span>
+            <span v-if="completed === true">🎉</span>
             <span v-else>🔎</span>
-            <span>{{ time }} day</span>
+            <span>{{ streak }} day</span>
         </div>
         <div class="time">{{ now_time }}</div> <!-- 动态显示当前时间 -->
         <div class="theme" @click="edit">⚙️</div>

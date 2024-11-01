@@ -1,6 +1,13 @@
+/**
+ * 将大模型返回的数据用正则解析成对象
+ *
+ * @param {*} data:String
+ * @returns {{ word: String; phonetic: String; definitions: {}; derivatives: {}; }}
+ */
 export const analyzeData = (data) => {
   const word = data.match(/word: (.*?)<br>/)[1].trim()
   const phonetic = data.match(/phonetic: (.*?)<br>/)[1].trim()
+
   // Definitions
   const definitions = []
   const definitionMatches = [
@@ -20,7 +27,7 @@ export const analyzeData = (data) => {
   const derivatives = []
   const derivativeMatches = [
     ...data.matchAll(
-      /term: (.*?)<br>\s*part of speech: (\w+)<br>\s*phonetic: (.*?)<br>\s*definition: (.*?)<br>\s*example sentence: (.*?)(?=<br>\s*term|$)/gs
+      /term: (.*?)<br>\s*part of speech: (\w+ \w+|\w+)<br>\s*phonetic: (.*?)<br>\s*definition: (.*?)<br>\s*example sentence: (.*?)(?=<br>\s*term|<br>|$)/gs
     )
   ]
   for (const match of derivativeMatches) {
@@ -32,6 +39,7 @@ export const analyzeData = (data) => {
       example_sentence: match[5].trim()
     })
   }
+
   return {
     word,
     phonetic,

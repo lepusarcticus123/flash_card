@@ -1,14 +1,14 @@
+const BASE_INTERVAL_HOURS = 12
 /**
- * 忘记
- * 次数，下次复习时间重置
- * 学习率下降0.1
+ * forget的记忆算法
  *
- * @param {*} id
+ * @async
+ * @param {*} id：卡片id
+ * @returns {*} message
  */
-// const version = await window.func.getversion()
 const forget = async (id) => {
-  const version = await window.func.getversion()
-  return newPromise((resolve, reject) => {
+  const version = await window.api.getversion()
+  return new Promise((resolve, reject) => {
     const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
@@ -19,9 +19,9 @@ const forget = async (id) => {
       getRequest.onsuccess = (event) => {
         const data = event.target.result
         data.reviewCount = 0
-        data.nextReviewDate = new Date() // 复习时间重置为当前时间
-        if (data.learningRatio > 0.1) {
-          data.learningRatio -= 0.1 // 学习率降低
+        data.nextReviewTime = Date.now() // 设置为当前时间戳
+        if (data.learningRatio >= 0.1) {
+          data.learningRatio -= 0.1
         }
         const editRequest = objectStore.put(data)
         editRequest.onsuccess = () => {
@@ -36,29 +36,46 @@ const forget = async (id) => {
 }
 
 /**
- * 艰难
- * 次数增加
- * 学习率下降0.05
+ * 计算下次复习的时间间隔
  *
+ * @param {*} reviewCount
+ * @param {*} learningRatio
+ * @param {*} difficultyFactor
+ * @returns {number}
+ */
+const calculateNextReviewInterval = (reviewCount, learningRatio, difficultyFactor) => {
+  return (
+    BASE_INTERVAL_HOURS *
+    Math.pow(reviewCount + 1, difficultyFactor) *
+    learningRatio *
+    1000 *
+    60 *
+    60
+  )
+}
+
+/**
+ * hard的记忆算法
+ *
+ * @async
  * @param {*} id
+ * @returns {unknown}
  */
 const hard = async (id) => {
-  const version = await window.func.getversion()
+  const version = await window.api.getversion()
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
       const objectStore = transaction.objectStore('cards')
-
       const getRequest = objectStore.get(id)
+
       getRequest.onsuccess = (event) => {
         const data = event.target.result
         data.reviewCount += 1
-        const currentTime = new Date().getTime()
-        data.nextReviewDate = new Date(
-          currentTime + data.reviewCount * (1 + data.learningRatio) * 1000 * 60 * 60 * 12
-        ) // 12小时
+        data.nextReviewTime =
+          Date.now() + calculateNextReviewInterval(data.reviewCount, data.learningRatio, 1.2) // 设置为时间戳
         if (data.learningRatio > 0.05) {
           data.learningRatio -= 0.05
         }
@@ -75,29 +92,28 @@ const hard = async (id) => {
 }
 
 /**
- * 良好
- * 次数增加，学习率上升0.05
+ * good的记忆算法
  *
+ * @async
  * @param {*} id
+ * @returns {unknown}
  */
 const good = async (id) => {
-  const version = await window.func.getversion()
+  const version = await window.api.getversion()
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
       const objectStore = transaction.objectStore('cards')
-
       const getRequest = objectStore.get(id)
+
       getRequest.onsuccess = (event) => {
         const data = event.target.result
         data.reviewCount += 1
-        const currentTime = new Date().getTime()
-        data.nextReviewDate = new Date(
-          currentTime + data.reviewCount * (1 + data.learningRatio) * 1000 * 60 * 60 * 48
-        ) // 48小时
-        if (data.learningRatio < 0.95) {
+        data.nextReviewTime =
+          Date.now() + calculateNextReviewInterval(data.reviewCount, data.learningRatio, 1.5) // 设置为时间戳
+        if (data.learningRatio < 1.95) {
           data.learningRatio += 0.05
         }
         const editRequest = objectStore.put(data)
@@ -113,29 +129,28 @@ const good = async (id) => {
 }
 
 /**
- * 轻松
- * 次数增加，学习率上升0.1
+ * easy的记忆算法
  *
+ * @async
  * @param {*} id
+ * @returns {unknown}
  */
 const easy = async (id) => {
-  const version = await window.func.getversion()
+  const version = await window.api.getversion()
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open('FlashCard', version)
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readwrite')
       const objectStore = transaction.objectStore('cards')
-
       const getRequest = objectStore.get(id)
+
       getRequest.onsuccess = (event) => {
         const data = event.target.result
         data.reviewCount += 1
-        const currentTime = new Date().getTime()
-        data.nextReviewDate = new Date(
-          currentTime + data.reviewCount * (1 + data.learningRatio) * 1000 * 60 * 60 * 120
-        ) // 120小时
-        if (data.learningRatio < 0.9) {
+        data.nextReviewTime =
+          Date.now() + calculateNextReviewInterval(data.reviewCount, data.learningRatio, 1.8) // 设置为时间戳
+        if (data.learningRatio < 1.9) {
           data.learningRatio += 0.1
         }
         const editRequest = objectStore.put(data)
@@ -149,5 +164,4 @@ const easy = async (id) => {
     }
   })
 }
-
 export { forget, hard, good, easy }

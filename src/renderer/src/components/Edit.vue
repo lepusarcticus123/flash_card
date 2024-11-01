@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { store } from '../store';
 import { useRouter } from 'vue-router';
 const theme = ref(false)
-const level = ref(false)
+const sound = ref(false)
 const router = useRouter()
 const back = () => {
     router.go(-1)
@@ -11,16 +11,16 @@ const back = () => {
 const themeDrop = () => {
     theme.value = !theme.value
 }
-const levelDrop = () => {
-    level.value = !level.value
+const soundDrop = () => {
+    sound.value = !sound.value
 }
 const changeTheme = (theme) => {
     store.commit('setTheme', theme)
     console.log(store.state.theme)
 }
-const changeLevel = (level) => {
-    store.commit('setLevel', level)
-    console.log(store.state.level)
+const changeSound = (sound) => {
+    store.commit('setSound', sound)
+    console.log(store.state.sound)
 }
 </script>
 <template>
@@ -35,24 +35,29 @@ const changeLevel = (level) => {
             <div id="pink" @click="changeTheme('pink')">Pink</div>
             <div id="black" @click="changeTheme('black')">Black</div>
         </div>
-        <div class="option" @click="levelDrop">Level</div>
-        <!-- <div v-if="level" class="level">
-            <div class="le" @click="changeLevel('primary')">primary🔮</div>
-            <div class="le" @click="changeLevel('intermediate')">intermediate💎</div>
-            <div class="le" @click="changeLevel('advanced')">Advanced🪄</div>
-        </div> -->
+        <div class="option" @click="soundDrop">Sound</div>
+        <div v-if="sound" class="sound">
+            <div @click="changeSound(['US', 'male'])">US-male</div>
+            <div @click="changeSound(['US', 'female'])">Us-female</div>
+            <div @click="changeSound(['UK', 'male'])">UK-male</div>
+            <div @click="changeSound(['UK', 'female'])">UK-female</div>
+        </div>
     </div>
 </template>
 <style scoped>
-.le {
-    padding: 2vw;
+.sound {
+    display: flex;
+    justify-content: space-around;
+}
+
+.sound div {
     cursor: pointer;
-    width: 20vw;
-    color: var(--sep);
-    border-radius: 1vh;
+    padding: 2vh;
+    width: 15%;
     text-align: center;
-    margin-bottom: 2vw;
+    border-radius: 1vh;
     background-color: var(--main);
+    margin: 1vh 0;
 }
 
 .edit {
@@ -62,8 +67,7 @@ const changeLevel = (level) => {
     background-color: var(--bt);
 }
 
-.theme,
-.level {
+.theme {
     display: flex;
     justify-content: space-around;
     align-items: center;

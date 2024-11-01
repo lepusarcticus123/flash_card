@@ -1,8 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon2.png?asset'
-import { type } from 'os'
+import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
 require('dotenv').config()
 
@@ -13,11 +12,9 @@ const menuItems = [
       {
         label: 'Quit',
         click: () => {
-          app.quit() // 点击 "Quit" 菜单项时退出应用
+          app.quit()
         }
-      },
-      { role: 'close' },
-      { role: 'reload' }
+      }
     ]
   },
   {
@@ -26,10 +23,10 @@ const menuItems = [
       {
         label: 'Source Code',
         click: async () => {
-          await shell.openExternal('https://github.com/lepusarcticus123/flash_card') // 点击 "more" 菜单项时输出 "more" 到控制台
+          await shell.openExternal('https://github.com/lepusarcticus123/flash_card')
         }
-      },
-      { type: 'separator' }
+      }
+      // { type: 'separator' }
     ]
   }
 ]
@@ -38,6 +35,7 @@ const menuItems = [
 const menu = Menu.buildFromTemplate(menuItems)
 Menu.setApplicationMenu(menu)
 
+//创建主窗口
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -74,7 +72,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  ipcMain.on('ping', () => console.log('pong'))
+  // ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
   app.on('activate', function () {
@@ -87,26 +85,29 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+//数据库版本信息
 ipcMain.handle('get-app-version', () => {
   return process.env.VERSION
 })
+//LLM's APIKey
 ipcMain.handle('get-api-key', () => {
   return process.env.API_KEY
 })
-ipcMain.handle('fetch-tts', async (event, text) => {
+//fetch audio
+ipcMain.handle('play', async (event, text, nation, gender) => {
   try {
     const response = await axios.get(
       `https://texttospeech.responsivevoice.org/v1/text:synthesize`,
       {
         params: {
-          text: 'hello world',
-          lang: 'en-GB',
+          text: text,
+          lang: `en-${nation}`,
           engine: 'g1',
           pitch: 0.5,
           rate: 0.5,
           volume: 1,
           key: 'SYtdTdUZ',
-          gender: 'female'
+          gender: gender
         },
         responseType: 'arraybuffer' // 用于返回音频数据
       }
@@ -114,6 +115,5 @@ ipcMain.handle('fetch-tts', async (event, text) => {
     return response.data
   } catch (error) {
     console.error('TTS request error:', error.message, error.response?.status, error.response?.data)
-    // throw error
   }
 })

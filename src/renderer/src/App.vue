@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
 import Top from './components/Top.vue';
+import { ref, computed } from 'vue';
 import { store } from './store';
 const ThemeName = computed(() => store.state.theme);
 </script>
 
 <template>
-  <div :class="ThemeName"> <!-- 修正 class 绑定 -->
+  <div :class="ThemeName">
     <Top />
+    <div class="wrapper"></div>
     <router-view></router-view>
   </div>
 </template>

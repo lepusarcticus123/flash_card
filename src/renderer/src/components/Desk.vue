@@ -1,65 +1,54 @@
 <script setup>
+import Study from './Study.vue';
+import CardDisplay from './CardDisplay.vue';
+import Back from './Back.vue';
 import { useRoute } from 'vue-router';
 import { store } from '../store';
 import router from '../router';
-import Study from './Study.vue';
-import CardDisplay from './CardDisplay.vue';
+
 import loadData from '../utills/LoadData';
-import { reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 const route = useRoute()
-let data = reactive([])
-const desk = store.state.desks.find((desk) => desk.id == route.params.id)
-const back = () => {
-    window.location.href = '/'
-}
-const add = () => {
-    router.push(`/desk/${route.params.id}/add`)
-}
-const loadCards = async () => {
+let data = ref([])
+onMounted(async () => {
     try {
-        data = await loadData(desk.id);
+        data.value = await loadData(route.params.id);
     }
     catch (error) {
         console.log("loadCards error", error)
     }
+})
+const desk = store.state.desks.find((desk) => desk.id == route.params.id)
+const add = () => {
+    router.push(`/desk/${route.params.id}/add`)
 }
-loadCards()
+const handleUpdateData = (id) => {
+    data.value = data.value.filter(card => card.id !== id);
+};
 </script>
 <template>
-
-    <div class="wrapper"></div>
-    <div class="back box" @click="back">
-        <div>Back</div>
-    </div>
+    <Back />
     <div class="add box" @click="add">Add</div>
-    <Study :name="desk.name" :id="desk.id" :data="data"></Study>
-    <CardDisplay :id="desk.id" :data="data"></CardDisplay>
+    <Study :desk="desk" :data="data"></Study>
+    <CardDisplay v-if="data.length > 0" :id="desk.id" :data="data" @updateData="handleUpdateData">
+    </CardDisplay>
+    <div v-else class="tip" @click="add">ADD SOME CARDS🤗</div>
 </template>
-<style>
-.box {
-    display: flex;
-    font-size: 3vw;
-    font-family: "Londrina Sketch", sans-serif;
-    color: var(--font);
-    position: absolute;
-    /* 将其放置在容器的最左侧 */
-    justify-content: center;
-    align-items: center;
-    margin-top: 2px;
-    width: 10vh;
-    background-color: var(--head);
-    height: 9vh;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.back {
-    left: 0;
-    margin-left: 3vh;
-}
-
+<style scoped>
 .add {
     margin-right: 3vh;
     right: 0;
+}
+
+.tip {
+    width: 75%;
+    margin: 3vh auto;
+    text-align: center;
+    color: var(--sep);
+    cursor: pointer;
+    border-radius: 2vh;
+    background-color: var(--main);
+    padding: 3vh;
+    font-family: 'Playfair Display', serif;
 }
 </style>

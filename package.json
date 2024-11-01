@@ -1,10 +1,9 @@
 {
   "name": "flash_card",
   "version": "1.0.0",
-  "description": "An Electron application with Vue",
+  "description": "An flash card app with LLM",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "lepusarcticus123",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -21,6 +20,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
     "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
     "vue-router": "^4.4.5",
     "vuex": "^4.1.0",
     "vuex-persistedstate": "^4.1.0"
@@ -42,7 +42,7 @@
   "build": {
     "appId": "com.dweb.flash_card",
     "productName": "FlashCard",
-    "icon": "resources/icon2.png",
+    "icon": "resources/icon.png",
     "win": {
       "icon": "resources/icon.ico"
     },

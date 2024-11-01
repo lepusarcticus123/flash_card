@@ -1,29 +1,50 @@
 <script setup>
-import { ref } from 'vue'
+import Message from './Message.vue';
+import { ref, onMounted, computed } from 'vue'
 import { store } from '../store/index.js';
+onMounted(() => {
+    store.dispatch('loadDesks');
+})
+const desks = computed(() => store.state.desks);
 
 let deskName = ref('')
+let message = ref('')
+const messageTimeout = ref(null);//提示信息定时器
 
 const show = () => {
     document.querySelector('#dialog').style.display = 'block'
     document.querySelector('#cover').style.display = 'block'
 }
-
 const hidden = () => {
     deskName.value = ''  // 清空输入框
     document.querySelector('#cover').style.display = 'none'
     document.querySelector('#dialog').style.display = 'none'
 }
-
+//展示提示信息
+const showMessage = (msg) => {
+    message.value = msg;
+    if (messageTimeout) {
+        clearTimeout(messageTimeout.value); // 清除上一次的定时器
+    }
+    messageTimeout.value = setTimeout(() => {
+        message.value = null;
+        result.value = ''; // 一秒后清空 message
+    }, 1000);
+};
 const save = () => {
     if (deskName.value === '') {
-        alert('👉 Please input your desk name')
+        showMessage('Please input a name!')
+        return
+    }
+    if (desks.value.some(item => item.name == deskName.value)) {
+        deskName.value = ''
+        showMessage('This name is already used!')
         return
     }
     // 在 store 中添加 desk 后，立即隐藏对话框
     store.dispatch('addDesk', deskName.value)
         .then(() => {
-            hidden()  // 确保添加 desk 成功后隐藏对话框
+            hidden()
         })
         .catch(() => {
             alert('Failed to add desk!')
@@ -33,7 +54,8 @@ const save = () => {
 
 <template>
     <div class="cover" id="cover" @click="hidden"></div>
-    <div id="dialog" @click.stop>
+    <Message :message="message" />
+    <div id="dialog">
         <p>Name Your Desk!</p>
         <input type="text" v-model="deskName">
         <div class="button" @click="hidden">Quit</div>
@@ -69,7 +91,7 @@ const save = () => {
     background-color: white;
     border: 1px solid var(--sep);
     border-radius: 10px;
-    z-index: 10;
+    z-index: 5;
 }
 
 #dialog .button {

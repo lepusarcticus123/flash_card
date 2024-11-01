@@ -1,17 +1,15 @@
 /**
- * LoadAllTheCards
- * 获取所有卡片数据
+ * 获取特定Desk的所有卡片数据
  * 返回promise把data包裹出去
  *
- * @param {*} deskId
- * @returns {*}
+ * @param {*} id
+ * @returns {*} data||error
  */
-const loadData = async (deskId) => {
+const loadData = async (id) => {
   const version = await window.api.getversion()
   return new Promise((resolve, reject) => {
     const data = []
     const request = window.indexedDB.open('FlashCard', version)
-
     request.onsuccess = (event) => {
       const db = event.target.result
       const transaction = db.transaction(['cards'], 'readonly')
@@ -21,12 +19,12 @@ const loadData = async (deskId) => {
       cursorRequest.onsuccess = (event) => {
         const cursor = event.target.result
         if (cursor) {
-          if (cursor.value.deskId === deskId) {
-            data.push(cursor.value) // 将游标的值存入数组
+          if (cursor.value.deskId === id) {
+            data.push(cursor.value)
           }
-          cursor.continue() // 继续下一个游标
+          cursor.continue()
         } else {
-          console.log('All data loaded', data)
+          // console.log('All data loaded', data)
           resolve(data) // 数据加载完成后，返回结果
         }
       }

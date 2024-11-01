@@ -1,9 +1,14 @@
 <script setup>
-import { defineProps } from 'vue';
+import { ref } from 'vue';
+import { useRoute } from 'vue-router';
+import router from '../router';
 const props = defineProps(['id', 'data'])
-//删除
+const emit = defineEmits(['updateData']);
+const word = ref('')
+const route = useRoute()
+
 const remove = async (id) => {
-    const version = await window.func.getversion();
+    const version = await window.api.getversion();
     const request = window.indexedDB.open('FlashCard', version);
 
     request.onsuccess = (event) => {
@@ -14,6 +19,7 @@ const remove = async (id) => {
         const deleteRequest = objectStore.delete(id);
 
         deleteRequest.onsuccess = () => {
+            emit('updateData', id);
             console.log(`Card with id ${id} deleted successfully.`);
         };
 
@@ -26,21 +32,66 @@ const remove = async (id) => {
         console.error('Database open error:', event.target.error);
     };
 };
+const search = () => {
+    if (props.data.some(card => card.word == word.value)) {
+        router.push(`/desk/${route.params.id}/search/${word.value}`)
+    } else {
+        alert('Not Found')
+    }
+}
 </script>
 <template>
     <div class="container">
-        <div class="cards" v-for="i in 5">
+        <div id="total">
+            <div>⚔️Total:{{ data.length }}</div>
             <div>
-                <p id="word">Lepus</p>
-                <p id="meaning">lepus is hshfhsfnskfhshfiuahsfhnsjhk</p>
+                <input @keypress.enter="search" type="text" v-model="word" placeholder="Search">
+                <span @click="search"> 🔍 </span>
             </div>
-
-            <div id="delete" @click="remove(i)">Delete</div>
+        </div>
+        <div class="cards" v-for="card in data">
+            <div>
+                <p id="word">{{ card.word }}</p>
+                <p class="def" v-for="def in card.definitions">
+                    - {{ def.definition }}
+                </p>
+            </div>
+            <div id="delete" @click="remove(card.id)">Delete</div>
         </div>
 
     </div>
 </template>
 <style scoped>
+#total {
+    font-size: 2vw;
+    display: flex;
+    justify-content: space-around;
+    margin: 0.5vh 0;
+    text-align: center;
+    color: var(--sep);
+}
+
+#total input {
+    background-color: var(--main);
+    padding: 0.5vh 1vw;
+    font-size: 1.8vw;
+    border: none;
+    border-bottom: 1px solid var(--sep);
+    outline: none;
+}
+
+#total span {
+    cursor: pointer;
+}
+
+#word {
+    font-size: 2vw
+}
+
+.def {
+    font-size: 1.5vw;
+}
+
 #delete {
     margin-right: 3vw;
     cursor: pointer;

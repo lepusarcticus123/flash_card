@@ -11,8 +11,8 @@ const api = {
     const apiKey = await ipcRenderer.invoke('get-api-key')
     return apiKey
   },
-  getaudio: async () => {
-    const audio = await ipcRenderer.invoke('fetch-tts')
+  getaudio: async (text, nation, gender) => {
+    const audio = await ipcRenderer.invoke('play', text, nation, gender)
     return audio
   }
 }

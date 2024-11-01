@@ -1,41 +1,85 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import loadData from '../utills/LoadData';
-import { reactive } from 'vue';
+import { onMounted, ref, computed } from 'vue';
+import { forget, hard, good, easy } from '../utills/memoAlgorithm'
+import { store } from '../store';
+const sound = computed(() => store.state.sound)
 const route = useRoute()
 const router = useRouter()
-const data = reactive([])
+const data = ref([])
 const id = route.params.id
+let index = ref(0)
 const back = () => {
     router.go(-1)
 }
 const flip = () => {
     document.querySelector('.select').style.display = 'flex'
-    document.querySelector('#more').style.display = 'block'
+    document.querySelector('#backside').style.display = 'block'
+    document.querySelector('#front').style.display = 'none'
 }
-
-//加载所有数据
-const loadCards = async () => {
+onMounted(async () => {
     try {
-        data = await loadData(id)
+        const allData = await loadData(id)
+        data.value = allData.filter((item) => item.nextReviewTime < new Date().getTime())
+        console.log(data.value)
     }
     catch {
         console.log('load data error')
     }
+})
+const play = async (text) => {
+    try {
+        const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
+        const blob = new Blob([audioData], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+    } catch (error) {
+        console.error('Error fetching TTS audio:', error);
+    }
 }
-loadCards()
-//卡片索引
-// let index=ref(0)
-//复习操作
-// const forget = () => {
-//     const request = window.indexedDB.open('FlashCard', '1')
-//     request.onsuccess = (event) => {
-//         const db = event.target.result
-//         const transaction = db.transaction(['cards'], 'readwrite').objectStore('cards')
-//         const card = transaction.get(route.params.id)
+const next = () => {
+    if (index.value < data.value.length - 1) {
+        index.value++
+    }
+    else {
+        store.dispatch('completeTask')
+        router.push('/congratulations')
+    }
+    document.querySelector('.select').style.display = 'none'
+    document.querySelector('#backside').style.display = 'none'
+    document.querySelector('#front').style.display = 'block'
+}
+const toNext = (status) => {
+    switch (status) {
+        case forget:
+            forget(data.value[index.value].id).then((res) => {
+                console.log(res);
+                next();
+            });
+            break;
+        case hard:
+            hard(data.value[index.value].id).then((res) => {
+                console.log(res);
+                next();
+            });
+            break;
+        case good:
+            good(data.value[index.value].id).then((res) => {
+                console.log(res);
+                next();
+            });
+            break;
+        case easy:
+            easy(data.value[index.value].id).then((res) => {
+                console.log(res);
+                next();
+            });
+            break;
+    }
+};
 
-//     }
-// }
 </script>
 
 <template>
@@ -43,71 +87,151 @@ loadCards()
     <div class="back box" @click="back">
         <div>Back</div>
     </div>
-    <div class="container" @click="flip">
-        <div>HAHA</div>
-        <div id="more">
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
-            <div class="li">1212</div>
+    <div class="container" @click="flip" v-if="data.length > 0">
+        <div id="front">
+            <p>{{ data[index].word }}</p>
+        </div>
+        <div id="backside">
+            <div id="word">
+                <p class="main-word">{{ data[index].word }}</p>
+                <p class="phonetic" @click="play(data[index].word)">
+                    {{ data[index].phonetic }}🔉
+                </p>
+            </div>
+            <div class="def" v-for="(def, idx) in data[index].definitions" :key="idx">
+                <p class="part-of-speech">{{ def.part_of_speech }}</p>
+                <p class="definition">-{{ def.definition }}</p>
+                <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
+            </div>
+            <hr>
+            <div class="derivative" v-for="(der, idx) in data[index].derivatives" :key="idx">
+                <p class="der-word">{{ der.term }} ({{ der.phonetic }})</p>
+                <p class="der-pos">{{ der.part_of_speech }}</p>
+                <p class="der-def">-{{ der.definition }}</p>
+                <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
+            </div>
         </div>
     </div>
     <div class="select">
-        <div @click="forget">😣Forget</div>
-        <div @click="hard">😳Hard</div>
-        <div @click="good">🤗Good</div>
-        <div @click="easy">🤩Easy</div>
+        <div @click="toNext(forget)">😣 Forget</div>
+        <div @click="toNext(hard)">😳 Hard</div>
+        <div @click="toNext(good)">🤗 Good</div>
+        <div @click="toNext(easy)">🤩 Easy</div>
     </div>
 </template>
+
 <style scoped>
-#more {
+#front p {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 7vw;
+    font-weight: bold;
+}
+
+#front {
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#backside {
     display: none;
 }
 
-.container {
-    cursor: pointer;
-    overflow-y: scroll;
-    position: relative;
-    width: 70%;
+/* 单词标题样式 */
+.main-word {
+    font-size: 3.5vw;
+    font-weight: bold;
     text-align: center;
-    color: var(--sep);
-    font-family: 'Playfair Display';
-    height: 60vh;
-    margin: 10vh auto;
-    margin-bottom: 4vh;
-    background-color: var(--main);
-
+    margin-bottom: 1vh;
 }
 
-/* 针对 Webkit 浏览器（如 Chrome 和 Safari） */
+.phonetic {
+    font-size: 2vw;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* 定义部分样式 */
+.def {
+    width: 90%;
+    padding: 1.5vw;
+    font-size: 1.8vw;
+    margin: 2vh auto;
+    background-color: var(--bt);
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.part-of-speech {
+    font-weight: bold;
+    margin-bottom: 0.5vh;
+}
+
+.definition {
+    margin-bottom: 1vh;
+}
+
+.example {
+    margin-top: 0.5vh;
+    cursor: pointer;
+}
+
+/* 派生词样式 */
+.derivative {
+    width: 92%;
+    background: var(--bt);
+    padding: 1.5vw;
+    margin: 2vh auto;
+    font-size: 1.8vw;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.der-word {
+    font-weight: bold;
+    margin-bottom: 0.5vh;
+}
+
+.der-pos,
+.der-def,
+.der-example {
+    font-size: 1.8vw;
+}
+
+.def-example {
+    cursor: pointer;
+}
+
+/* 容器样式 */
+.container {
+    width: 70%;
+    height: 65vh;
+    margin: 4vh auto;
+    padding: 1vw;
+    overflow-y: auto;
+    background: var(--main);
+    color: var(--sep);
+    border-radius: 10px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    font-family: 'Playfair Display';
+}
+
+/* 滚动条样式 */
 .container::-webkit-scrollbar {
     width: 10px;
     /* 滚动条的宽度 */
 }
 
-/* 滚动条轨道 */
 .container::-webkit-scrollbar-track {
     background-color: var(--bt);
     /* 设置滚动条背景色 */
 }
 
-/* 滚动条滑块 */
 .container::-webkit-scrollbar-thumb {
     background-color: var(--head);
     /* 设置滑块颜色 */
@@ -115,32 +239,32 @@ loadCards()
     /* 为滑块添加边框，颜色与背景色一致 */
 }
 
-/* 悬停时的滑块样式 */
 .container::-webkit-scrollbar-thumb:hover {
     background-color: var(--bt);
     /* 滑块悬停时的颜色变化 */
 }
 
+/* 难度选择按钮 */
 .select {
     display: none;
     width: 100%;
     /* display: flex; */
     justify-content: space-around;
-    align-items: center;
+    margin-top: 2vh;
 }
 
 .select div {
+    padding: 1.5vw 2vw;
+    border-radius: 8px;
+    font-size: 2.5vh;
     cursor: pointer;
     font-size: 3vh;
     color: var(--sep);
     border-radius: 10px;
     background-color: var(--main);
     padding: 3vw;
+    font-weight: bold;
+    font-family: "Poiret One", sans-serif;
     transition: all 0.3s ease-in-out;
-}
-
-.select div:hover {
-    background-color: var(--sep);
-    color: var(--main);
 }
 </style>
