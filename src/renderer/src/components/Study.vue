@@ -10,6 +10,7 @@ const review = ref(0)
 const notStudied = ref(0)
 
 const des = ref(props.desk ? props.desk.description : ''); // 初始检查
+console.log('我是desk页', props.data)
 //更新卡片复习数
 const updateCounts = () => {
     total.value = props.data.filter((item) => item.nextReviewTime < Date.now())

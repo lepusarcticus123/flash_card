@@ -1,26 +1,42 @@
 <script setup>
-//just copy Card.vue and tweak it a little bit Cuz i'm tired.😣
+import Back from './Back.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
 import loadData from '../utills/LoadData';
-const route = useRoute();
-const router = useRouter();
-const card = ref({})
-const data = ref([]);
-const back = () => {
-    router.go(-1)
-}
-onMounted(async () => {
-    data.value = await loadData(route.params.id);
-    card.value = data.value.find(item => item.word === route.params.word) || {};
-});
-const flip = () => {
+import { onMounted, ref, computed } from 'vue';
+import { forget, hard, good, easy } from '../utills/memoAlgorithm'
+import { store } from '../store';
+
+const sound = computed(() => store.state.sound)
+
+const route = useRoute()
+const card = ref(null)
+
+const desk_id = route.params.id
+
+//翻转
+const flip = (event) => {
     document.querySelector('.container').classList.toggle('flip');
-    document.querySelector('.select').style.display = 'flex'
 }
+//存储书桌中需要复习的卡片
+const data = ref([])
+onMounted(async () => {
+    try {
+        await loadData(desk_id).then(val => {
+            data.value = val
+            card.value = data.value.filter(item => item.word == route.params.word)[0]
+            console.log(card.value)
+        })
+    }
+    catch (err) {
+        console.log('load data error', err)
+    }
+})
+//播放声音
 const play = async (text) => {
     try {
-        const audioData = await window.api.getaudio(text);
+        event.stopPropagation(); // 阻止事件冒泡
+        //responseType: 'arraybuffer'
+        const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
         const blob = new Blob([audioData], { type: 'audio/mpeg' });
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
@@ -32,10 +48,8 @@ const play = async (text) => {
 </script>
 <template>
     <div class="wrapper"></div>
-    <div class="back box" @click="back">
-        <div>Back</div>
-    </div>
-    <div class="container" @click="flip" v-if="card.word">
+    <Back />
+    <div class="container" @click="flip" v-if="card">
         <div id="front">
             <p>{{ card.word }}</p>
         </div>
@@ -48,18 +62,20 @@ const play = async (text) => {
             </div>
             <div class="def" v-for="(def, idx) in card.definitions" :key="idx">
                 <p class="part-of-speech">{{ def.part_of_speech }}</p>
-                <p class="definition">-{{ def.definition }}</p>
+                <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
                 <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
             </div>
+            <hr>
             <div class="derivative" v-for="(der, idx) in card.derivatives" :key="idx">
-                <p class="der-word">{{ der.term }} ({{ der.phonetic }})</p>
+                <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
                 <p class="der-pos">{{ der.part_of_speech }}</p>
-                <p class="der-def">-{{ der.definition }}</p>
+                <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
                 <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
             </div>
         </div>
     </div>
 </template>
+
 <style scoped>
 .flip #front {
     transform: rotateY(180deg);
@@ -130,6 +146,7 @@ const play = async (text) => {
 
 .definition {
     margin-bottom: 1vh;
+    cursor: pointer;
 }
 
 .example {
@@ -151,15 +168,18 @@ const play = async (text) => {
 .der-word {
     font-weight: bold;
     margin-bottom: 0.5vh;
+    cursor: pointer;
 }
 
 .der-pos,
 .der-def,
 .der-example {
     font-size: 1.8vw;
+    /* cursor: pointer; */
 }
 
-.def-example {
+.der-def,
+.der-example {
     cursor: pointer;
 }
 

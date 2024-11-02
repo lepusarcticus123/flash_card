@@ -9,8 +9,8 @@ const openDB = async () => {
   const version = await window.api.getversion()
   const request = window.indexedDB.open('FlashCard', version) // 指定数据库版本
   // 处理数据库打开失败
-  request.onerror = function () {
-    console.log('数据库打开失败')
+  request.onerror = function (err) {
+    console.log('数据库打开失败', err)
   }
   request.onsuccess = function (event) {
     const db = event.target.result

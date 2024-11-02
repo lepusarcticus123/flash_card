@@ -66,13 +66,12 @@ const showMessage = (msg) => {
         result.value = ''; // 一秒后清空 message
     }, 1000);
 };
-//保存卡片
 const save = async () => {
     if (result.value === '') {
         showMessage('NO Data🤨');
-        return
+        return;
     }
-    const data = analyzeData(result.value)
+    const data = analyzeData(result.value);
     const version = await window.api.getversion();
     const request = window.indexedDB.open('FlashCard', version);
 
@@ -101,35 +100,42 @@ const save = async () => {
             showMessage('Success🎐');
             word.value = "";
             console.log('卡片添加成功');
-
+            const data = []
+            const cardStore = transaction.objectStore('cards')
+            const cursorRequest = cardStore.openCursor()
+            cursorRequest.onsuccess = (event) => {
+                const cursor = event.target.result
+                if (cursor) {
+                    if (cursor.value.nextReviewTime) {
+                        data.push(cursor.value)
+                    }
+                    cursor.continue()
+                } else {
+                    console.log('All data loaded', data)
+                }
+            }
+            cursorRequest.onerror = (event) => {
+                console.error('Cursor error:', event.target.error)
+            }
         };
 
         addRequest.onerror = function (err) {
             showMessage('Failed🤕');
             console.log('卡片添加失败', err);
         };
-        //遍历一下desk
-        transaction.oncomplete = function () {
-            console.log('事务完成，开始遍历记录');
-            const readTransaction = db.transaction(['cards'], 'readonly');
-            const readObjectStore = readTransaction.objectStore('cards');
-            const cursorRequest = readObjectStore.openCursor();
 
-            cursorRequest.onsuccess = function (event) {
-                const cursor = event.target.result;
-                if (cursor) {
-                    console.log(cursor.value);
-                    cursor.continue();
-                } else {
-                    console.log('已遍历所有记录');
-                }
-            };
-            cursorRequest.onerror = function () {
-                console.log('游标操作失败');
-            };
+        // 事务完成时关闭数据库连接
+        transaction.oncomplete = function () {
+            console.log('事务完成，关闭数据库连接');
+            db.close();
+        };
+
+        transaction.onerror = function (err) {
+            console.log('事务处理失败', err);
         };
     };
 };
+
 //搜索
 const search = async () => {
     if (word.value === '') {

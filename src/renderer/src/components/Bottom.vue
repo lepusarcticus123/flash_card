@@ -2,10 +2,13 @@
 import Message from './Message.vue';
 import { ref, onMounted, computed } from 'vue'
 import { store } from '../store/index.js';
+import { useRouter } from 'vue-router';
+import importData from '../utills/importData.js';
 onMounted(() => {
     store.dispatch('loadDesks');
 })
 const desks = computed(() => store.state.desks);
+const router = useRouter()
 
 let deskName = ref('')
 let message = ref('')
@@ -53,9 +56,19 @@ const save = () => {
 const importDesk = () => {
     document.querySelector('#file').click()
 }
-const handleImport = (event) => {
-    importData(event.target.files[0]).then(res => console.log(res))
+// 在调用 importData 的地方
+const handleImport = async (event) => {
+    try {
+        await importData(event.target.files[0])
+        console.log('Data imported, now loading desks...')
+        await store.dispatch('loadDesks') // 确保在导入完成后再调用 dispatch
+        console.log('Desks loaded, navigating to home...')
+        router.push('/') // 或其他操作
+    } catch (error) {
+        console.error('Import failed:', error)
+    }
 }
+
 </script>
 
 <template>

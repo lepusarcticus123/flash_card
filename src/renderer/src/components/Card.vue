@@ -14,10 +14,16 @@ const router = useRouter()
 const desk_id = route.params.id
 let index = ref(0)
 //翻转
-const flip = () => {
+const flip = (event) => {
     document.querySelector('.container').classList.toggle('flip');
-    document.querySelector('.select').style.display = 'flex'
+    if (document.querySelector('.select').style.display == 'none') {
+        document.querySelector('.select').style.display = 'flex'
+    } else {
+        document.querySelector('.select').style.display = 'none'
+    }
+
 }
+
 
 //存储书桌中需要复习的卡片
 const data = ref([])
@@ -34,6 +40,7 @@ onMounted(async () => {
 //播放声音
 const play = async (text) => {
     try {
+        event.stopPropagation(); // 阻止事件冒泡
         //responseType: 'arraybuffer'
         const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
         const blob = new Blob([audioData], { type: 'audio/mpeg' });
@@ -101,20 +108,20 @@ const toNext = (status) => {
             </div>
             <div class="def" v-for="(def, idx) in data[index].definitions" :key="idx">
                 <p class="part-of-speech">{{ def.part_of_speech }}</p>
-                <p class="definition">-{{ def.definition }}</p>
+                <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
                 <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
             </div>
             <hr>
             <div class="derivative" v-for="(der, idx) in data[index].derivatives" :key="idx">
-                <p class="der-word">{{ der.term }} ({{ der.phonetic }})</p>
+                <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
                 <p class="der-pos">{{ der.part_of_speech }}</p>
-                <p class="der-def">-{{ der.definition }}</p>
+                <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
                 <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
             </div>
         </div>
     </div>
-    <div class="select">
-        <div @click="toNext(forget)">😣 Forget</div>
+    <div class="select" style="display: none;">
+        <div @click="toNext(forget)" @keypress.>😣 Forget</div>
         <div @click="toNext(hard)">😳 Hard</div>
         <div @click="toNext(good)">🤗 Good</div>
         <div @click="toNext(easy)">🤩 Easy</div>
@@ -191,6 +198,7 @@ const toNext = (status) => {
 
 .definition {
     margin-bottom: 1vh;
+    cursor: pointer;
 }
 
 .example {
@@ -212,15 +220,18 @@ const toNext = (status) => {
 .der-word {
     font-weight: bold;
     margin-bottom: 0.5vh;
+    cursor: pointer;
 }
 
 .der-pos,
 .der-def,
 .der-example {
     font-size: 1.8vw;
+    /* cursor: pointer; */
 }
 
-.def-example {
+.der-def,
+.der-example {
     cursor: pointer;
 }
 

@@ -17,12 +17,12 @@ const getData = async () => {
         cursorRequest.onsuccess = (event) => {
             const cursor = event.target.result
             if (cursor) {
-                if (cursor.value.nextReviewTime < Date.now()) {
+                if (cursor.value.nextReviewTime) {
                     data.value.push(cursor.value)
                 }
                 cursor.continue()
             } else {
-                // console.log('All data loaded', data)
+                console.log('All data loaded', data)
             }
         }
         cursorRequest.onerror = (event) => {
@@ -33,7 +33,6 @@ const getData = async () => {
 onMounted(() => {
     getData()
 })
-getData()
 </script>
 <template>
     <div class="banner">

@@ -6,6 +6,7 @@ import { store } from '../store/index.js';
 onMounted(() => {
     store.dispatch('loadDesks');
 })
+
 const desks = computed(() => store.state.desks);
 </script>
 <template>
