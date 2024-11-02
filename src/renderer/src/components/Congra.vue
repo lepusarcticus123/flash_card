@@ -8,7 +8,6 @@ const router = useRouter()
         <p id="text">CONGRATULATIONS!</p>
         <div id="back" @click="router.push('/')">Back to Home</div>
     </div>
-
 </template>
 <style scoped>
 .congratulations {

@@ -99,6 +99,7 @@ const save = async () => {
 
         addRequest.onsuccess = function () {
             showMessage('Success🎐');
+            word.value = "";
             console.log('卡片添加成功');
 
         };
@@ -193,7 +194,6 @@ const search = async () => {
         showMessage('Bad Request,Retry!🤧');
         return;
     }
-    word.value = "";
     loading.value = false;
 
     const reader = response.body.getReader();

@@ -9,17 +9,14 @@ const total = ref(0)
 const review = ref(0)
 const notStudied = ref(0)
 
-const des = ref(props.desk.description)
-
-const study = () => {
-    router.push({ path: '/desk/' + props.desk.id + '/study' });
-};
-
+const des = ref(props.desk ? props.desk.description : ''); // 初始检查
+//更新卡片复习数
 const updateCounts = () => {
     total.value = props.data.filter((item) => item.nextReviewTime < Date.now())
     review.value = props.data.filter((item) => item.nextReviewTime < Date.now() && item.reviewCount > 0)
     notStudied.value = props.data.filter(item => item.reviewCount == 0)
 }
+//监视卡片数据变化
 watch(() => props.data, updateCounts, { immediate: true });
 
 </script>
@@ -49,7 +46,8 @@ watch(() => props.data, updateCounts, { immediate: true });
             </div>
 
         </div>
-        <div id="study" @click="study" v-if="total.length > 0">Study!🎐</div>
+        <div id="study" @click="router.push({ path: '/desk/' + props.desk.id + '/study' })" v-if="total.length > 0">
+            Study!🎐</div>
     </div>
 </template>
 <style scoped>

@@ -1,13 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import router from '../router';
+
 const props = defineProps(['id', 'data'])
 const emit = defineEmits(['updateData']);
+
 const word = ref('')
 const route = useRoute()
+//分批加载卡片
+const pile = ref(10)
 
+onMounted(() => {
+    //检测滚动到底部
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+            pile.value += 10;
+        }
+    });
+})
+
+//删除卡片
 const remove = async (id) => {
+    if (!confirm(`Are you sure you want to delete the card with id ${id}?`)) return;
+
     const version = await window.api.getversion();
     const request = window.indexedDB.open('FlashCard', version);
 
@@ -32,14 +48,17 @@ const remove = async (id) => {
         console.error('Database open error:', event.target.error);
     };
 };
+
+//搜索
 const search = () => {
     if (props.data.some(card => card.word == word.value)) {
-        router.push(`/desk/${route.params.id}/search/${word.value}`)
+        router.push(`/desk/${route.params.id}/card/${word.value}`)
     } else {
         alert('Not Found')
     }
 }
 </script>
+
 <template>
     <div class="container">
         <div id="total">
@@ -49,19 +68,31 @@ const search = () => {
                 <span @click="search"> 🔍 </span>
             </div>
         </div>
-        <div class="cards" v-for="card in data">
-            <div>
-                <p id="word">{{ card.word }}</p>
-                <p class="def" v-for="def in card.definitions">
-                    - {{ def.definition }}
-                </p>
+        <div class="cards-container">
+            <div class="cards" v-for="card in data.slice(0, pile)" :key="card.id"
+                @click="router.push(`/desk/${route.params.id}/card/${card.word}`)">
+                <div id="content">
+                    <p id="word">{{ card.word }}</p>
+                    <p class="def" v-for="def in card.definitions">
+                        - {{ def.definition }}
+                    </p>
+                </div>
+                <div id="delete" @click="remove(card.id)">Delete</div>
             </div>
-            <div id="delete" @click="remove(card.id)">Delete</div>
         </div>
 
     </div>
 </template>
+
 <style scoped>
+.cards-container {
+    padding-bottom: 10vh;
+}
+
+#content {
+    cursor: pointer;
+}
+
 #total {
     font-size: 2vw;
     display: flex;

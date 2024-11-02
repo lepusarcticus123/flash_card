@@ -50,6 +50,12 @@ const save = () => {
             alert('Failed to add desk!')
         })
 }
+const importDesk = () => {
+    document.querySelector('#file').click()
+}
+const handleImport = (event) => {
+    importData(event.target.files[0]).then(res => console.log(res))
+}
 </script>
 
 <template>
@@ -62,7 +68,8 @@ const save = () => {
         <div class="button" @click="save">Save</div>
     </div>
     <div class="bottom">
-        <div class="round" @click="show"> + </div>
+        <div @click="show"> Add </div>
+        <div @click="importDesk"><input type="file" id="file" style="display:none" @change="handleImport" />Import</div>
     </div>
 </template>
 
@@ -124,20 +131,16 @@ const save = () => {
     bottom: 0;
     left: 0;
     width: 100vw;
+    display: flex;
+    justify-content: space-around;
     height: 10vh;
     z-index: 5;
+    font-size: 8vh;
     font-family: "Londrina Sketch", sans-serif;
     background-color: var(--bt);
 }
 
-.round {
-    width: 10vh;
-    height: 10vh;
-    margin: 0 auto;
-    font-size: 13vh;
-    text-align: center;
-    line-height: 60%;
-    color: var(--head);
+.bottom div {
     cursor: pointer;
 }
 </style>

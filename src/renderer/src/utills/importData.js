@@ -7,9 +7,8 @@
  *
  * @param {*} file
  */
-// const version = await window.func.getversion()
 const importData = async (file) => {
-  const version = await window.func.getversion()
+  const version = await window.api.getversion()
   const reader = new FileReader()
   const batchSize = 100 // 每次导入100条数据
 
@@ -21,7 +20,7 @@ const importData = async (file) => {
       const db = event.target.result
 
       // 分批插入的函数
-      const insertBatch = (store, dataArray, batchIndex) => {
+      const insertBatch = (dataArray, batchIndex) => {
         const start = batchIndex * batchSize
         const end = start + batchSize
         const batch = dataArray.slice(start, end)
@@ -29,17 +28,29 @@ const importData = async (file) => {
         if (batch.length === 0) return Promise.resolve() // 递归终止条件
 
         return new Promise((resolve, reject) => {
-          const transaction = db.transaction(store, 'readwrite')
-          const objectStore = transaction.objectStore(store)
-
-          batch.forEach((item) => {
-            const request = objectStore.add(item)
-            request.onsuccess = () => console.log(`Inserted: ${item}`)
-            request.onerror = (event) => reject(event)
+          const transaction = db.transaction('cards', 'readwrite')
+          const objectStore = transaction.objectStore('cards')
+          const promises = batch.map((item) => {
+            return new Promise((resolve, reject) => {
+              const checkRequest = objectStore.get(item.id)
+              checkRequest.onsuccess = (event) => {
+                if (event.target.result) {
+                  item.id += '_imported' // 若存在冲突，则修改ID
+                }
+                const addRequest = objectStore.add(item)
+                addRequest.onsuccess = () => {
+                  console.log(`Inserted: ${item}`)
+                  resolve()
+                }
+                addRequest.onerror = (event) => reject(event)
+              }
+              checkRequest.onerror = (event) => reject(event)
+            })
           })
 
-          transaction.oncomplete = () => resolve()
-          transaction.onerror = (event) => reject(event)
+          Promise.all(promises)
+            .then(() => resolve())
+            .catch((error) => reject(error))
         })
       }
 
@@ -48,17 +59,26 @@ const importData = async (file) => {
         return new Promise((resolve, reject) => {
           const transaction = db.transaction('desks', 'readwrite')
           const desksStore = transaction.objectStore('desks')
-          const request = desksStore.add(data.desk)
-          request.onsuccess = () => resolve()
-          request.onerror = (event) => reject(event)
+
+          const checkRequest = desksStore.get(data.desk.id)
+          checkRequest.onsuccess = (event) => {
+            if (event.target.result) {
+              data.desk.id += '_imported' // 若存在冲突，则修改ID
+            }
+            const addRequest = desksStore.add(data.desk)
+            addRequest.onsuccess = () => resolve()
+            addRequest.onerror = (event) => reject(event)
+          }
+          checkRequest.onerror = (event) => reject(event)
         })
       }
 
       // 插入 cards
+      // 插入所有 cards
       const insertAllCards = async () => {
         const totalBatches = Math.ceil(data.cards.length / batchSize)
         for (let i = 0; i < totalBatches; i++) {
-          await insertBatch('cards', data.cards, i)
+          await insertBatch(data.cards, i) // 修正参数
         }
       }
 
@@ -80,3 +100,4 @@ const importData = async (file) => {
 
   reader.readAsText(file)
 }
+export default importData

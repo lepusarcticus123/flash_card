@@ -1,13 +1,23 @@
 <script setup>
 import { ref } from 'vue'
 import { store } from '../store';
-import { useRouter } from 'vue-router';
+import Back from './Back.vue';
+import Message from './Message.vue';
 const theme = ref(false)
 const sound = ref(false)
-const router = useRouter()
-const back = () => {
-    router.go(-1)
-}
+const message = ref(null)//提示信息
+const messageTimeout = ref(null);//提示信息定时器
+//展示提示信息
+const showMessage = (msg) => {
+    message.value = msg;
+    if (messageTimeout) {
+        clearTimeout(messageTimeout.value); // 清除上一次的定时器
+    }
+    messageTimeout.value = setTimeout(() => {
+        message.value = null;
+        result.value = ''; // 一秒后清空 message
+    }, 1000);
+};
 const themeDrop = () => {
     theme.value = !theme.value
 }
@@ -16,18 +26,19 @@ const soundDrop = () => {
 }
 const changeTheme = (theme) => {
     store.commit('setTheme', theme)
+    showMessage(`Theme changed to ${theme}`)
     console.log(store.state.theme)
 }
 const changeSound = (sound) => {
     store.commit('setSound', sound)
+    showMessage(`Sound changed to ${sound[0]}-${sound[1]}`)
     console.log(store.state.sound)
 }
 </script>
 <template>
     <div class="wrapper"></div>
-    <div class="back box" @click="back">
-        <div>Back</div>
-    </div>
+    <Back />
+    <Message :message="message" />
     <div class="edit">
         <div class="option" @click="themeDrop">Theme</div>
         <div v-if="theme" class="theme">
@@ -42,9 +53,36 @@ const changeSound = (sound) => {
             <div @click="changeSound(['UK', 'male'])">UK-male</div>
             <div @click="changeSound(['UK', 'female'])">UK-female</div>
         </div>
+
     </div>
+    <div class="info">
+        <a
+            href="https://github.com/lepusarcticus123/flash_card">sourceCode:https://github.com/lepusarcticus123/flash_card</a>
+        <div>Copyright (c) 2024 lepusarcticus123
+        </div>
+    </div>
+
 </template>
 <style scoped>
+.info {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+}
+
+.info a {
+
+    text-decoration: none;
+    color: var(--sep);
+}
+
+.info div {
+    margin: 1vh 0;
+    color: var(--sep);
+}
+
 .sound {
     display: flex;
     justify-content: space-around;

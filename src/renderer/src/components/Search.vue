@@ -1,4 +1,5 @@
 <script setup>
+//just copy Card.vue and tweak it a little bit Cuz i'm tired.😣
 import { useRoute, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import loadData from '../utills/LoadData';
@@ -12,11 +13,10 @@ const back = () => {
 onMounted(async () => {
     data.value = await loadData(route.params.id);
     card.value = data.value.find(item => item.word === route.params.word) || {};
-    console.log('我是word', card.value);
 });
 const flip = () => {
-    document.querySelector('#backside').style.display = 'block'
-    document.querySelector('#front').style.display = 'none'
+    document.querySelector('.container').classList.toggle('flip');
+    document.querySelector('.select').style.display = 'flex'
 }
 const play = async (text) => {
     try {
@@ -61,10 +61,18 @@ const play = async (text) => {
     </div>
 </template>
 <style scoped>
+.flip #front {
+    transform: rotateY(180deg);
+}
+
+.flip #backside {
+    transform: rotateY(0deg);
+}
+
 #front p {
     display: block;
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 7vw;
@@ -76,10 +84,18 @@ const play = async (text) => {
     width: 100%;
     height: 100%;
     position: relative;
+    overflow-y: hidden;
 }
 
 #backside {
-    display: none;
+    transform: rotateY(180deg);
+}
+
+#front,
+#backside {
+    backface-visibility: hidden;
+    position: absolute;
+    transition: transform 0.6s;
 }
 
 /* 单词标题样式 */
@@ -98,9 +114,10 @@ const play = async (text) => {
 
 /* 定义部分样式 */
 .def {
+    width: 90%;
     padding: 1.5vw;
     font-size: 1.8vw;
-    margin: 2vh 0;
+    margin: 2vh auto;
     background-color: var(--bt);
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -122,9 +139,10 @@ const play = async (text) => {
 
 /* 派生词样式 */
 .derivative {
+    width: 92%;
     background: var(--bt);
     padding: 1.5vw;
-    margin: 2vh 0;
+    margin: 2vh auto;
     font-size: 1.8vw;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -147,11 +165,13 @@ const play = async (text) => {
 
 /* 容器样式 */
 .container {
+    perspective: 1000px;
     width: 70%;
     height: 65vh;
     margin: 4vh auto;
     padding: 1vw;
     overflow-y: auto;
+    overflow-x: hidden;
     background: var(--main);
     color: var(--sep);
     border-radius: 10px;
@@ -180,29 +200,5 @@ const play = async (text) => {
 .container::-webkit-scrollbar-thumb:hover {
     background-color: var(--bt);
     /* 滑块悬停时的颜色变化 */
-}
-
-/* 难度选择按钮 */
-.select {
-    display: none;
-    width: 100%;
-    /* display: flex; */
-    justify-content: space-around;
-    margin-top: 2vh;
-}
-
-.select div {
-    padding: 1.5vw 2vw;
-    border-radius: 8px;
-    font-size: 2.5vh;
-    cursor: pointer;
-    font-size: 3vh;
-    color: var(--sep);
-    border-radius: 10px;
-    background-color: var(--main);
-    padding: 3vw;
-    font-weight: bold;
-    font-family: "Poiret One", sans-serif;
-    transition: all 0.3s ease-in-out;
 }
 </style>

@@ -5,6 +5,8 @@ import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
 require('dotenv').config()
 
+let mainWindow // 将 mainWindow 声明为全局变量
+
 const menuItems = [
   {
     label: 'Menu',
@@ -35,9 +37,9 @@ const menuItems = [
 const menu = Menu.buildFromTemplate(menuItems)
 Menu.setApplicationMenu(menu)
 
-//创建主窗口
+// 创建主窗口
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     icon: icon,
@@ -49,32 +51,36 @@ function createWindow() {
       sandbox: false
     }
   })
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url) //默认浏览器打开而不是当前窗口
+    shell.openExternal(details.url) // 默认浏览器打开而不是当前窗口
     return { action: 'deny' }
   })
-  //开发环境生产环境加载不同地址
+
+  // 开发环境生产环境加载不同地址
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // mainWindow.webContents.openDevTools() // 将开发工具打开放在这里，确保 mainWindow 已定义
 }
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.FlashCard.MyApp')
+  process.on('uncaughtException', (error) => console.error(error))
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // ipcMain.on('ping', () => console.log('pong'))
-
   createWindow()
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
@@ -85,15 +91,18 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-//数据库版本信息
+
+// 数据库版本信息
 ipcMain.handle('get-app-version', () => {
   return process.env.VERSION
 })
-//LLM's APIKey
+
+// LLM's APIKey
 ipcMain.handle('get-api-key', () => {
   return process.env.API_KEY
 })
-//fetch audio
+
+// fetch audio
 ipcMain.handle('play', async (event, text, nation, gender) => {
   try {
     const response = await axios.get(

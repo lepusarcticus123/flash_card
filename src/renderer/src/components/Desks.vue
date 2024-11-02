@@ -2,6 +2,7 @@
 import { onMounted, computed } from 'vue';
 import router from '../router.js';
 import { store } from '../store/index.js';
+//加载书桌数据
 onMounted(() => {
     store.dispatch('loadDesks');
 })

@@ -1,35 +1,40 @@
 <script setup>
+import Back from './Back.vue';
 import { useRoute, useRouter } from 'vue-router';
 import loadData from '../utills/LoadData';
 import { onMounted, ref, computed } from 'vue';
 import { forget, hard, good, easy } from '../utills/memoAlgorithm'
 import { store } from '../store';
+
 const sound = computed(() => store.state.sound)
+
 const route = useRoute()
 const router = useRouter()
-const data = ref([])
-const id = route.params.id
+
+const desk_id = route.params.id
 let index = ref(0)
-const back = () => {
-    router.go(-1)
-}
+//翻转
 const flip = () => {
+    document.querySelector('.container').classList.toggle('flip');
     document.querySelector('.select').style.display = 'flex'
-    document.querySelector('#backside').style.display = 'block'
-    document.querySelector('#front').style.display = 'none'
 }
+
+//存储书桌中需要复习的卡片
+const data = ref([])
 onMounted(async () => {
     try {
-        const allData = await loadData(id)
-        data.value = allData.filter((item) => item.nextReviewTime < new Date().getTime())
-        console.log(data.value)
+        await loadData(desk_id).then(val => {
+            data.value = val.filter((item) => item.nextReviewTime < new Date().getTime())
+        })
     }
     catch {
         console.log('load data error')
     }
 })
+//播放声音
 const play = async (text) => {
     try {
+        //responseType: 'arraybuffer'
         const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
         const blob = new Blob([audioData], { type: 'audio/mpeg' });
         const audioUrl = URL.createObjectURL(blob);
@@ -39,6 +44,7 @@ const play = async (text) => {
         console.error('Error fetching TTS audio:', error);
     }
 }
+//下一个
 const next = () => {
     if (index.value < data.value.length - 1) {
         index.value++
@@ -47,10 +53,9 @@ const next = () => {
         store.dispatch('completeTask')
         router.push('/congratulations')
     }
-    document.querySelector('.select').style.display = 'none'
-    document.querySelector('#backside').style.display = 'none'
-    document.querySelector('#front').style.display = 'block'
+    flip()
 }
+//更新卡片状态
 const toNext = (status) => {
     switch (status) {
         case forget:
@@ -79,14 +84,10 @@ const toNext = (status) => {
             break;
     }
 };
-
 </script>
-
 <template>
     <div class="wrapper"></div>
-    <div class="back box" @click="back">
-        <div>Back</div>
-    </div>
+    <Back />
     <div class="container" @click="flip" v-if="data.length > 0">
         <div id="front">
             <p>{{ data[index].word }}</p>
@@ -121,10 +122,18 @@ const toNext = (status) => {
 </template>
 
 <style scoped>
+.flip #front {
+    transform: rotateY(180deg);
+}
+
+.flip #backside {
+    transform: rotateY(0deg);
+}
+
 #front p {
     display: block;
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 7vw;
@@ -136,10 +145,18 @@ const toNext = (status) => {
     width: 100%;
     height: 100%;
     position: relative;
+    overflow-y: hidden;
 }
 
 #backside {
-    display: none;
+    transform: rotateY(180deg);
+}
+
+#front,
+#backside {
+    backface-visibility: hidden;
+    position: absolute;
+    transition: transform 0.6s;
 }
 
 /* 单词标题样式 */
@@ -209,11 +226,13 @@ const toNext = (status) => {
 
 /* 容器样式 */
 .container {
+    perspective: 1000px;
     width: 70%;
     height: 65vh;
     margin: 4vh auto;
     padding: 1vw;
     overflow-y: auto;
+    overflow-x: hidden;
     background: var(--main);
     color: var(--sep);
     border-radius: 10px;

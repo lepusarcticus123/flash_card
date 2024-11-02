@@ -104,6 +104,7 @@ const store = createStore({
           } else {
             // 遍历结束时，将 desks 数组提交给 Vuex 的 state
             commit('setDesks', desks)
+            console.log('我是数据库', desks)
             // console.log('已遍历所有记录')
           }
         }

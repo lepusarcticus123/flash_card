@@ -4,6 +4,7 @@
   "description": "An flash card app with LLM",
   "main": "./out/main/index.js",
   "author": "lepusarcticus123",
+  "license": "Mozilla Public License (MPL) 2.0",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -21,6 +22,7 @@
     "@electron-toolkit/utils": "^3.0.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
+    "form-data": "^4.0.1",
     "vue-router": "^4.4.5",
     "vuex": "^4.1.0",
     "vuex-persistedstate": "^4.1.0"
@@ -31,7 +33,7 @@
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "electron": "^31.0.2",
-    "electron-builder": "^24.13.3",
+    "electron-builder": "^25.1.8",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.26.0",
@@ -40,17 +42,19 @@
     "vue": "^3.4.30"
   },
   "build": {
-    "appId": "com.dweb.flash_card",
-    "productName": "FlashCard",
-    "icon": "resources/icon.png",
+    "productName": "Anki_less",
+    "appId": "com.dweb.flashcard",
+    "directories": {
+      "output": "build"
+    },
     "win": {
-      "icon": "resources/icon.ico"
+      "icon": "./resources/icon.png"
     },
     "mac": {
-      "icon": "resources/icon.icns"
+      "icon": "./resources/icon.png"
     },
-    "linux": {
-      "icon": "resources/icon.png"
-    }
+    "extraFiles": [
+      ".env"
+    ]
   }
 }
