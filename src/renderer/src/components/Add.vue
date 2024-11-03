@@ -88,6 +88,7 @@ const save = async () => {
             phonetic: data.phonetic,
             definitions: data.definitions,
             derivatives: data.derivatives,
+            common_phrases: data.common_phrases,
             nextReviewTime: new Date().getTime(),
             reviewCount: 0,
             deskId: desk_id,
@@ -111,7 +112,7 @@ const save = async () => {
                     }
                     cursor.continue()
                 } else {
-                    console.log('All data loaded', data)
+                    console.log('添加成功', data)
                 }
             }
             cursorRequest.onerror = (event) => {
@@ -154,28 +155,30 @@ const search = async () => {
         messages: [
             {
                 "role": "system",
-                "content": "This is a new chat session,ignore all previous instructions."
-            },
-            {
-                role: 'system',
-                content: `想了解一个特定单词的详细信息。必须每次都严格按照以下面全英文格式返回（不要自己修改格式，乱加东西):
-    word: 单词本身
-    phonetic: 单词的国际音标（IPA）。
-    definitions: 请为单词的每个意思单独列出，并包含以下信息：
-    part of speech: 单词在该释义下的词性（名词、动词等）。
-    definition: 该词义对应的解释。
-    example sentence: 该词义对应的例句。
-    derivatives: 请提供常见的派生词（如名词、形容词、动词、反义词等），并包含以下信息：
-    term:派生词本身。
-    part of speech: 派生词的词性。
-    phonetic: 派生词的国际音标（IPA）。
-    definition: 派生词的解释。
-    example sentence: 该派生词的示例句。
-请直接返回纯文本格式不要返回markdown格式！`
+                "content": "YOU ARE A HIGH QUALITY ENGLISH TEACHER, YOU MUST RETURN THE DATA IN THE EXACT SAME FORMAT AS THE EXAMPLE BELOW. YOU MUST NOT RETURN ANYTHING ELSE."
             },
             {
                 role: 'user',
-                content: word.value
+                content: `Please provide detailed information about the word ${word.value} in the EXACT SAME format:
+word: example
+phonetic: /ɪɡˈzæmpəl/
+definitions:
+part of speech: noun
+definition: A thing characteristic of its kind or illustrating a general rule.
+example sentence: This is an example of a well-written sentence.
+part of speech: verb
+definition: To serve as an instance of; to exemplify.
+example sentence: He will example the new procedure for the team.
+derivatives:
+term: exemplary
+part of speech: adjective
+phonetic: /ɪɡˈzempləri/
+definition: Serving as an outstanding model or example.
+example sentence: She showed exemplary leadership during the crisis.
+common phrases:
+term: for example
+definition: To provide an example or illustration.
+example sentence: For example, the company has a strong reputation for innovation.`
             }
         ],
         stream: true
@@ -245,6 +248,7 @@ const search = async () => {
     } catch (error) {
         console.error("读取流时出错:", error);
     } finally {
+        console.log(result.value)
         reader.releaseLock(); // 释放阅读器的锁
         response.body?.cancel(); // 确保流被关闭
     }

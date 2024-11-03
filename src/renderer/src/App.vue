@@ -39,4 +39,12 @@ const ThemeName = computed(() => store.state.theme);
   --sep: #c86b85;
   --bt: rgb(255, 250, 250);
 }
+
+.capitalize {
+  --cap: capitalize;
+}
+
+.non-capitalize {
+  --cap: none
+}
 </style>

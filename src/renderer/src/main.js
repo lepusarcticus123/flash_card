@@ -32,6 +32,7 @@ const openDB = async () => {
       cardStore.createIndex('phonetic', 'phonetic', { unique: false }) // 音标
       cardStore.createIndex('definitions', 'definitions', { unique: false }) // 释义
       cardStore.createIndex('derivatives', 'derivatives', { unique: false }) // 派生词
+      cardStore.createIndex('common_phrases', 'common_phrases', { unique: false }) // 常见词组
       cardStore.createIndex('nextReviewTime', 'nextReviewTime', { unique: false }) // 下次复习时间
       cardStore.createIndex('reviewCount', 'reviewCount', { unique: false }) // 复习次数
       cardStore.createIndex('deskId', 'deskId', { unique: false }) // 关联到 desk 的 deskId

@@ -5,6 +5,7 @@ import Back from './Back.vue';
 import Message from './Message.vue';
 const theme = ref(false)
 const sound = ref(false)
+const capitalize = ref(false)
 const message = ref(null)//提示信息
 const messageTimeout = ref(null);//提示信息定时器
 //展示提示信息
@@ -15,7 +16,6 @@ const showMessage = (msg) => {
     }
     messageTimeout.value = setTimeout(() => {
         message.value = null;
-        result.value = ''; // 一秒后清空 message
     }, 1000);
 };
 const themeDrop = () => {
@@ -23,6 +23,9 @@ const themeDrop = () => {
 }
 const soundDrop = () => {
     sound.value = !sound.value
+}
+const capitalizeDrop = () => {
+    capitalize.value = !capitalize.value
 }
 const changeTheme = (theme) => {
     store.commit('setTheme', theme)
@@ -33,6 +36,11 @@ const changeSound = (sound) => {
     store.commit('setSound', sound)
     showMessage(`Sound changed to ${sound[0]}-${sound[1]}`)
     console.log(store.state.sound)
+}
+const changeCapitalize = (boolean) => {
+    store.commit('setCapitalize', boolean)
+    showMessage(`Capitalize changed to ${boolean}`)
+    console.log(store.state.capitalize)
 }
 </script>
 <template>
@@ -53,7 +61,11 @@ const changeSound = (sound) => {
             <div @click="changeSound(['UK', 'male'])">UK-male</div>
             <div @click="changeSound(['UK', 'female'])">UK-female</div>
         </div>
-
+        <div class="option" @click="capitalizeDrop">Capitalize</div>
+        <div v-if="capitalize" class="capitalize">
+            <div @click="changeCapitalize(true)">Capitalize</div>
+            <div @click="changeCapitalize(false)">Not Capitalize</div>
+        </div>
     </div>
     <div class="info">
         <a
@@ -64,6 +76,20 @@ const changeSound = (sound) => {
 
 </template>
 <style scoped>
+.capitalize {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: var(--sep);
+}
+
+.capitalize div {
+    cursor: pointer;
+    padding: 2vh;
+    width: 15%;
+    text-align: center;
+}
+
 .info {
     position: absolute;
     bottom: 0;

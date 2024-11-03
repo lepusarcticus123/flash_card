@@ -3,32 +3,42 @@ import Back from './Back.vue';
 import { useRoute, useRouter } from 'vue-router';
 import loadData from '../utills/LoadData';
 import { onMounted, ref, computed } from 'vue';
-import { forget, hard, good, easy } from '../utills/memoAlgorithm'
 import { store } from '../store';
 
 const sound = computed(() => store.state.sound)
-
+const capitalize = computed(() => store.state.capitalize)
+const className = ref('')
+if (capitalize.value == true) {
+    className.value = 'capitalize'
+} else {
+    className.value = 'non-capitalize'
+}
 const route = useRoute()
-const card = ref(null)
+const router = useRouter()
 
 const desk_id = route.params.id
-
+console.log(route.params.word)
+let index = ref(0)
 //翻转
 const flip = (event) => {
     document.querySelector('.container').classList.toggle('flip');
+    if (document.querySelector('.select').style.display == 'none') {
+        document.querySelector('.select').style.display = 'flex'
+    } else {
+        document.querySelector('.select').style.display = 'none'
+    }
+
 }
 //存储书桌中需要复习的卡片
 const data = ref([])
 onMounted(async () => {
     try {
         await loadData(desk_id).then(val => {
-            data.value = val
-            card.value = data.value.filter(item => item.word == route.params.word)[0]
-            console.log(card.value)
+            data.value = val.find((item) => item.word === route.params.word)
         })
     }
-    catch (err) {
-        console.log('load data error', err)
+    catch {
+        console.log('load data error')
     }
 })
 //播放声音
@@ -49,34 +59,84 @@ const play = async (text) => {
 <template>
     <div class="wrapper"></div>
     <Back />
-    <div class="container" @click="flip" v-if="card">
-        <div id="front">
-            <p>{{ card.word }}</p>
-        </div>
-        <div id="backside">
-            <div id="word">
-                <p class="main-word">{{ card.word }}</p>
-                <p class="phonetic" @click="play(card.word)">
-                    {{ card.phonetic }}🔉
-                </p>
+    <div :class="className">
+        <div class="container" v-if="data">
+            <div id="front" @click="flip">
+                <p>{{ data.word }}</p>
             </div>
-            <div class="def" v-for="(def, idx) in card.definitions" :key="idx">
-                <p class="part-of-speech">{{ def.part_of_speech }}</p>
-                <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
-                <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
-            </div>
-            <hr>
-            <div class="derivative" v-for="(der, idx) in card.derivatives" :key="idx">
-                <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
-                <p class="der-pos">{{ der.part_of_speech }}</p>
-                <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
-                <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
+            <div id="backside">
+                <div id="word">
+                    <p class="main-word">{{ data.word }}</p>
+                    <p class="phonetic" @click="play(data.word)">
+                        {{ data.phonetic }}🔉
+                    </p>
+                </div>
+                <p class="classify">💫Definitions</p>
+                <div class="def" v-for="(def, idx) in data.definitions" :key="idx">
+                    <p class="part-of-speech">{{ def.part_of_speech }}</p>
+                    <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
+                    <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
+                </div>
+                <hr>
+                <p class="classify">🎊Derivatives</p>
+                <div class="derivative" v-for="(der, idx) in data.derivatives" :key="idx">
+                    <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
+                    <p class="der-pos">{{ der.part_of_speech }}</p>
+                    <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
+                    <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
+                </div>
+                <hr>
+                <p class="classify">🎢Common Phrases</p>
+                <div v-if="data.common_phrases" class="common_phrases" v-for="(phrase, index) in data.common_phrases">
+                    <p @click="play(phrase.term)">{{ phrase.term }}</p>
+                    <p>-{{ phrase.definition }}</p>
+                    <p @click="play(phrase.example_sentence)">🔉Example:{{ phrase.example_sentence }}</p>
+                </div>
             </div>
         </div>
     </div>
+
 </template>
 
 <style scoped>
+.common_phrases {
+    width: 90%;
+    padding: 1.5vw;
+    font-size: 1.8vw;
+    margin: 2vh auto;
+    background-color: var(--bt);
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.common_phrases p:nth-of-type(1) {
+    font-size: 2vw;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.common_phrases p:nth-of-type(2) {
+    text-transform: var(--cap);
+}
+
+.common_phrases p:nth-of-type(3) {
+    margin-top: 0.5vh;
+    cursor: pointer;
+    text-transform: var(--cap);
+}
+
+.common_phrases p {
+    margin-top: 0.5vh;
+}
+
+.classify {
+    font-size: 3vh;
+    font-weight: bold;
+    font-family: 'Poiret One';
+    margin: 0 3vw;
+    margin-bottom: 1vh;
+}
+
 .flip #front {
     transform: rotateY(180deg);
 }
@@ -105,6 +165,7 @@ const play = async (text) => {
 
 #backside {
     transform: rotateY(180deg);
+    width: 100%;
 }
 
 #front,
@@ -142,21 +203,25 @@ const play = async (text) => {
 .part-of-speech {
     font-weight: bold;
     margin-bottom: 0.5vh;
+
 }
 
 .definition {
     margin-bottom: 1vh;
     cursor: pointer;
+    text-transform: var(--cap);
 }
 
 .example {
     margin-top: 0.5vh;
     cursor: pointer;
+    font-weight: 400;
+    text-transform: var(--cap);
 }
 
 /* 派生词样式 */
 .derivative {
-    width: 92%;
+    width: 90%;
     background: var(--bt);
     padding: 1.5vw;
     margin: 2vh auto;
@@ -166,6 +231,7 @@ const play = async (text) => {
 }
 
 .der-word {
+    font-size: 2vw;
     font-weight: bold;
     margin-bottom: 0.5vh;
     cursor: pointer;
@@ -180,15 +246,17 @@ const play = async (text) => {
 
 .der-def,
 .der-example {
+    margin-top: 0.5vh;
     cursor: pointer;
+    text-transform: var(--cap);
 }
 
 /* 容器样式 */
 .container {
     perspective: 1000px;
-    width: 70%;
+    width: 80%;
     height: 65vh;
-    margin: 4vh auto;
+    margin: 4vh 15vh;
     padding: 1vw;
     overflow-y: auto;
     overflow-x: hidden;

@@ -1,4 +1,5 @@
 // src/store/index.js
+import { capitalize } from 'vue'
 import { createStore } from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 const store = createStore({
@@ -6,10 +7,15 @@ const store = createStore({
     desks: [], //书桌
     theme: 'default', //主题
     sound: ['US', 'female'], //声音
+    capitalize: false,
     streak: 0, // 连续完成天数
     lastCompletedDate: null // 上一次完成任务的日期
   },
   mutations: {
+    setCapitalize(state, boolean) {
+      state.capitalize = boolean
+      console.log(state.capitalize)
+    },
     setTheme(state, theme) {
       state.theme = theme
     },

@@ -49,7 +49,7 @@ const handleImport = (event) => {
         <Study v-if="desk" :desk="desk" :data="data"></Study>
         <CardDisplay v-if="desk && data.length > 0" :id="desk.id" :data="data" @updateData="handleUpdateData">
         </CardDisplay>
-        <div v-else class="tip" @click="add">ADD SOME CARDS🤗</div>
+        <div v-else class="tip" @click="router.push(`/desk/${route.params.id}/add`)">ADD SOME CARDS🤗</div>
         <div class="bottom">
             <div class="button" @click="exportDesk">Export</div>
             <div class="button" @click="importDesk"><input type="file" id="file" style="display:none"

@@ -54,9 +54,11 @@
       "oneClick": false,
       "perMachine": true,
       "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Anki_less"
+      "shortcutName": "Anki Less",
+      "deleteAppDataOnUninstall": true
     },
     "mac": {
       "icon": "./resources/icon.icns"

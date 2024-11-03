@@ -22,8 +22,6 @@ onMounted(() => {
 
 //删除卡片
 const remove = async (id) => {
-    if (!confirm(`Are you sure you want to delete the card with id ${id}?`)) return;
-
     const version = await window.api.getversion();
     const request = window.indexedDB.open('FlashCard', version);
 
@@ -69,9 +67,8 @@ const search = () => {
             </div>
         </div>
         <div class="cards-container">
-            <div class="cards" v-for="card in data.slice(0, pile)" :key="card.id"
-                @click="router.push(`/desk/${route.params.id}/card/${card.word}`)">
-                <div id="content">
+            <div class="cards" v-for="card in data.slice(0, pile)" :key="card.id">
+                <div id="content" @click="router.push(`/desk/${route.params.id}/card/${card.word}`)">
                     <p id="word">{{ card.word }}</p>
                     <p class="def" v-for="def in card.definitions">
                         - {{ def.definition }}
