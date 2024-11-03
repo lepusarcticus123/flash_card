@@ -1,38 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-const data = ref([])
+const props= defineProps(['data'])
 
-//获取所有卡片数据
-const getData = async () => {
-    const version = await window.api.getversion();
-    const request = window.indexedDB.open('FlashCard', version);
-    request.onerror = function () {
-        console.log('数据库打开失败');
-    };
-    request.onsuccess = (event) => {
-        const db = event.target.result
-        const transaction = db.transaction(['cards'], 'readonly')
-        const cardStore = transaction.objectStore('cards')
-        const cursorRequest = cardStore.openCursor()
-        cursorRequest.onsuccess = (event) => {
-            const cursor = event.target.result
-            if (cursor) {
-                if (cursor.value.nextReviewTime) {
-                    data.value.push(cursor.value)
-                }
-                cursor.continue()
-            } else {
-                console.log('All data loaded', data)
-            }
-        }
-        cursorRequest.onerror = (event) => {
-            console.error('Cursor error:', event.target.error)
-        }
-    }
-}
-onMounted(() => {
-    getData()
-})
 </script>
 <template>
     <div class="banner">

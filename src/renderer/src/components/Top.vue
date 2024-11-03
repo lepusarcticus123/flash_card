@@ -7,7 +7,11 @@ const streak = computed(() => store.state.streak)
 const date = ref(new Date())
 const now_time = ref(date.value.toString().split(' ')[4])
 const today = new Date().toISOString().slice(0, 10)// 格式化为 "YYYY/MM/DD"
-const completed = computed(() => store.dispatch('checkCompleted'))
+const completed = ref(false)
+completed.value = lastCompletedDate.value === today
+console.log(today, lastCompletedDate.value, completed.value)
+
+
 
 // 定时更新时间
 onMounted(() => {
@@ -15,6 +19,7 @@ onMounted(() => {
         date.value = new Date()
         now_time.value = date.value.toString().split(' ')[4]
     }, 1000)
+    store.dispatch('checkCompleted')
 
     onUnmounted(() => {
         clearInterval(timer)

@@ -8,6 +8,9 @@ onMounted(() => {
 })
 
 const desks = computed(() => store.state.desks);
+const remove = (id) => {
+    store.dispatch('deleteDesk', id)
+}
 </script>
 <template>
     <div v-for="desk in desks" key="desk.id">
@@ -17,7 +20,7 @@ const desks = computed(() => store.state.desks);
                 <div @click="router.push(`/desk/${desk.id}`)">{{ desk.createdAt }}</div>
                 <div @click="router.push(`/desk/${desk.id}`)" v-if="desk.description">{{ desk.description }}</div>
                 <div @click="router.push(`/desk/${desk.id}`)" v-else>This is a default description.</div>
-                <div @click="store.dispatch('deleteDesk', desk.id)">Delete</div>
+                <div @click="remove(desk.id)">Delete</div>
             </div>
         </div>
     </div>

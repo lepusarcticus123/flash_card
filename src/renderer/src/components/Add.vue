@@ -281,7 +281,7 @@ example sentence: For example, the company has a strong reputation for innovatio
 .pretend p {
     width: 80%;
     margin: 15vh auto;
-    font-size: 8vh;
+    font-size: 7vh;
     font-family: 'Poiret One';
 }
 

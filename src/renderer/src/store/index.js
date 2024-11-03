@@ -24,6 +24,7 @@ const store = createStore({
     },
     setStreak(state, streak) {
       state.streak = streak
+      console.log('streak', state.streak)
     },
     setLastCompletedDate(state, date) {
       state.lastCompletedDate = date
@@ -54,7 +55,7 @@ const store = createStore({
       }
     }
   },
-  // plugins: [createPersistedState()], //持久化
+  plugins: [createPersistedState()], //持久化
   actions: {
     //完成今日任务，增加连续天数
     completeTask({ state, commit }) {
@@ -81,10 +82,8 @@ const store = createStore({
       const today = new Date().toISOString().slice(0, 10) // 格式化为 "YYYY-MM-DD"
       const lastDate = state.lastCompletedDate
       if (lastDate && lastDate === today) {
-        return true // 今天已完成，不重复计数
       } else {
         commit('setStreak', 0)
-        return false
       }
     },
     //获取所有书桌
@@ -192,26 +191,42 @@ const store = createStore({
           const deskObjectStore = transaction.objectStore('desks')
           const cardObjectStore = transaction.objectStore('cards')
 
-          const getAllRequest = cardObjectStore.getAll()
+          // 删除与书桌相关的卡片
+          const cardsCursor = cardObjectStore.openCursor()
+          cardsCursor.onsuccess = (event) => {
+            const cursor = event.target.result
+            console.log(cursor)
+            if (cursor) {
+              if (cursor.value.deskId == id) {
+                const deleteCardRequest = cardObjectStore.delete(cursor.value.id)
+                // deleteCardRequest.onsuccess = () => {
+                //   console.log(`Card with ID ${cursor.value.id} deleted`)
+                // }
+              }
+              cursor.continue()
+            } else {
+            }
+          }
+          cardsCursor.onerror = () => console.log('Failed to delete cards')
 
-          getAllRequest.onsuccess = (event) => {
-            const cards = event.target.result
-
-            // 遍历卡片，删除与书桌相关的卡片
-            cards.forEach((card) => {
-              cardObjectStore.delete(card.id)
-            })
+          // 删除书桌
+          const deleteRequest = deskObjectStore.delete(Number(id))
+          deleteRequest.onsuccess = () => {
+            // console.log(`Desk with ID ${id} deleted`)
           }
 
-          const deleteRequest = deskObjectStore.delete(id)
-
-          deleteRequest.onsuccess = () => {
-            // 删除 Vuex 的 state 中对应的 desk
+          // 确保事务完成后提交 Vuex 更改
+          transaction.oncomplete = () => {
             commit('deleteDesk', id)
+            // console.log('Transaction complete')
+          }
+
+          transaction.onerror = (event) => {
+            console.error('Transaction error:', event.target.error)
           }
         }
-      } catch {
-        console.log('删除书桌失败')
+      } catch (error) {
+        console.log('删除书桌失败', error)
       }
     }
   }

@@ -22,13 +22,13 @@ const openDB = async () => {
     console.log(event)
     if (!db.objectStoreNames.contains('desks')) {
       const deskStore = db.createObjectStore('desks', { keyPath: 'id', autoIncrement: true }) // 使用 'id' 作为主键，并自动递增
-      deskStore.createIndex('name', 'name', { unique: true }) // desk 名称索引
+      deskStore.createIndex('name', 'name', { unique: false }) // desk 名称索引
       deskStore.createIndex('createdAt', 'createdAt', { unique: false }) // 创建时间索引
       deskStore.createIndex('description', 'description', { unique: false }) // 描述索引
     }
     if (!db.objectStoreNames.contains('cards')) {
       const cardStore = db.createObjectStore('cards', { keyPath: 'id', autoIncrement: true }) // 使用 'id' 作为主键，并自动递增为单词
-      cardStore.createIndex('word', 'word', { unique: true }) // 单词唯一索引
+      cardStore.createIndex('word', 'word', { unique: false }) // 单词唯一索引
       cardStore.createIndex('phonetic', 'phonetic', { unique: false }) // 音标
       cardStore.createIndex('definitions', 'definitions', { unique: false }) // 释义
       cardStore.createIndex('derivatives', 'derivatives', { unique: false }) // 派生词
