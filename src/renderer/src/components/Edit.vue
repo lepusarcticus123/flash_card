@@ -4,7 +4,6 @@ import { store } from '../store';
 import Back from './Back.vue';
 import Message from './Message.vue';
 const theme = ref(false)
-const sound = ref(false)
 const capitalize = ref(false)
 const message = ref(null)//提示信息
 const messageTimeout = ref(null);//提示信息定时器
@@ -20,9 +19,6 @@ const showMessage = (msg) => {
 };
 const themeDrop = () => {
     theme.value = !theme.value
-}
-const soundDrop = () => {
-    sound.value = !sound.value
 }
 const capitalizeDrop = () => {
     capitalize.value = !capitalize.value
@@ -53,13 +49,6 @@ const changeCapitalize = (boolean) => {
             <div id="default" @click="changeTheme('default')">Default</div>
             <div id="pink" @click="changeTheme('pink')">Pink</div>
             <div id="black" @click="changeTheme('black')">Black</div>
-        </div>
-        <div class="option" @click="soundDrop">Sound</div>
-        <div v-if="sound" class="sound">
-            <div @click="changeSound(['US', 'male'])">US-male</div>
-            <div @click="changeSound(['US', 'female'])">Us-female</div>
-            <div @click="changeSound(['UK', 'male'])">UK-male</div>
-            <div @click="changeSound(['UK', 'female'])">UK-female</div>
         </div>
         <div class="option" @click="capitalizeDrop">Capitalize</div>
         <div v-if="capitalize" class="capitalize">

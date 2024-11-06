@@ -22,11 +22,6 @@ let index = ref(0)
 //翻转
 const flip = (event) => {
     document.querySelector('.container').classList.toggle('flip');
-    if (document.querySelector('.select').style.display == 'none') {
-        document.querySelector('.select').style.display = 'flex'
-    } else {
-        document.querySelector('.select').style.display = 'none'
-    }
 
 }
 //存储书桌中需要复习的卡片
@@ -42,11 +37,10 @@ onMounted(async () => {
     }
 })
 //播放声音
-const play = async (text) => {
+const play = async (event, text) => {
     try {
-        event.stopPropagation(); // 阻止事件冒泡
         //responseType: 'arraybuffer'
-        const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
+        const audioData = await window.api.getaudio(text);
         const blob = new Blob([audioData], { type: 'audio/mpeg' });
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
@@ -67,30 +61,32 @@ const play = async (text) => {
             <div id="backside">
                 <div id="word">
                     <p class="main-word">{{ data.word }}</p>
-                    <p class="phonetic" @click="play(data.word)">
+                    <p class="phonetic" @click.stop="play(data.word)">
                         {{ data.phonetic }}🔉
                     </p>
                 </div>
                 <p class="classify">💫Definitions</p>
                 <div class="def" v-for="(def, idx) in data.definitions" :key="idx">
                     <p class="part-of-speech">{{ def.part_of_speech }}</p>
-                    <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
-                    <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
+                    <p class="definition" @click.stop="play(def.definition)">-{{ def.definition }}</p>
+                    <p class="example" @click.stop="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}
+                    </p>
                 </div>
                 <hr>
                 <p class="classify">🎊Derivatives</p>
                 <div class="derivative" v-for="(der, idx) in data.derivatives" :key="idx">
-                    <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
+                    <p class="der-word" @click.stop="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
                     <p class="der-pos">{{ der.part_of_speech }}</p>
-                    <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
-                    <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
+                    <p class="der-def" @click.stop="play(der.definition)">-{{ der.definition }}</p>
+                    <p class="der-example" @click.stop="play(der.example_sentence)">🔉Example: {{ der.example_sentence
+                        }}</p>
                 </div>
                 <hr>
                 <p class="classify">🎢Common Phrases</p>
                 <div v-if="data.common_phrases" class="common_phrases" v-for="(phrase, index) in data.common_phrases">
-                    <p @click="play(phrase.term)">{{ phrase.term }}</p>
+                    <p @click.stop="play(phrase.term)">{{ phrase.term }}</p>
                     <p>-{{ phrase.definition }}</p>
-                    <p @click="play(phrase.example_sentence)">🔉Example:{{ phrase.example_sentence }}</p>
+                    <p @click.stop="play(phrase.example_sentence)">🔉Example:{{ phrase.example_sentence }}</p>
                 </div>
             </div>
         </div>

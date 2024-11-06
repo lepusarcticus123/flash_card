@@ -151,7 +151,7 @@ const search = async () => {
     loading.value = true;
     const apiKey = await window.api.getApiKey();
     const prompt = {
-        model: 'glm-4-flashx',
+        model: 'glm-4-plus',
         messages: [
             {
                 "role": "system",

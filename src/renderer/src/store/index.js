@@ -6,7 +6,6 @@ const store = createStore({
   state: {
     desks: [], //书桌
     theme: 'default', //主题
-    sound: ['US', 'female'], //声音
     capitalize: false,
     streak: 0, // 连续完成天数
     lastCompletedDate: null // 上一次完成任务的日期

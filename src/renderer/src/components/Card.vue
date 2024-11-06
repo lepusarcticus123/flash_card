@@ -41,20 +41,26 @@ onMounted(async () => {
         console.log('load data error')
     }
 })
-//播放声音
 const play = async (text) => {
     try {
-        event.stopPropagation(); // 阻止事件冒泡
-        //responseType: 'arraybuffer'
-        const audioData = await window.api.getaudio(text, sound.value[0], sound.value[1]);
-        const blob = new Blob([audioData], { type: 'audio/mpeg' });
-        const audioUrl = URL.createObjectURL(blob);
-        const audio = new Audio(audioUrl);
-        audio.play();
+        // 通过 IPC 调用主进程的 getaudio 方法，传递文本和其他参数（如声音类型等）
+        const audioData = await window.api.getaudio(text);
+        if (audioData) {
+            // 创建一个 Blob 对象并将 audioData 作为音频数据传入
+            const blob = new Blob([audioData], { type: 'audio/mpeg' });
+            // 生成音频 URL
+            const audioUrl = URL.createObjectURL(blob);
+            // 创建音频对象并播放
+            const audio = new Audio(audioUrl);
+            audio.play();
+        } else {
+            console.error('No audio data received');
+        }
     } catch (error) {
         console.error('Error fetching TTS audio:', error);
     }
 }
+
 //下一个
 const next = () => {
     if (index.value < data.value.length - 1) {
@@ -107,31 +113,33 @@ const toNext = (status) => {
             <div id="backside">
                 <div id="word">
                     <p class="main-word">{{ data[index].word }}</p>
-                    <p class="phonetic" @click="play(data[index].word)">
+                    <p class="phonetic" @click.stop="play(data[index].word)">
                         {{ data[index].phonetic }}🔉
                     </p>
                 </div>
                 <p class="classify">💫Definitions</p>
                 <div class="def" v-for="(def, idx) in data[index].definitions" :key="idx">
                     <p class="part-of-speech">{{ def.part_of_speech }}</p>
-                    <p class="definition" @click="play(def.definition)">-{{ def.definition }}</p>
-                    <p class="example" @click="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}</p>
+                    <p class="definition" @click.stop="play(def.definition)">-{{ def.definition }}</p>
+                    <p class="example" @click.stop="play(def.example_sentence)">🔉Example: {{ def.example_sentence }}
+                    </p>
                 </div>
                 <hr>
                 <p class="classify">🎊Derivatives</p>
                 <div class="derivative" v-for="(der, idx) in data[index].derivatives" :key="idx">
-                    <p class="der-word" @click="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
+                    <p class="der-word" @click.stop="play(der.term)">{{ der.term }} ({{ der.phonetic }})</p>
                     <p class="der-pos">{{ der.part_of_speech }}</p>
-                    <p class="der-def" @click="play(der.definition)">-{{ der.definition }}</p>
-                    <p class="der-example" @click="play(der.example_sentence)">🔉Example: {{ der.example_sentence }}</p>
+                    <p class="der-def" @click.stop="play(der.definition)">-{{ der.definition }}</p>
+                    <p class="der-example" @click.stop="play(der.example_sentence)">🔉Example: {{ der.example_sentence
+                        }}</p>
                 </div>
                 <hr>
                 <p class="classify">🎢Common Phrases</p>
                 <div v-if="data[index].common_phrases" class="common_phrases"
                     v-for="(phrase, index) in data[index].common_phrases">
-                    <p @click="play(phrase.term)">{{ phrase.term }}</p>
+                    <p @click.stop="play(phrase.term)">{{ phrase.term }}</p>
                     <p>-{{ phrase.definition }}</p>
-                    <p @click="play(phrase.example_sentence)">🔉Example:{{ phrase.example_sentence }}</p>
+                    <p @click.stop="play(phrase.example_sentence)">🔉Example:{{ phrase.example_sentence }}</p>
                 </div>
             </div>
         </div>

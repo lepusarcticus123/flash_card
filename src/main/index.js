@@ -2,7 +2,9 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/favicon.png?asset'
-import axios from 'axios'
+import fs from 'fs'
+import path from 'path'
+import md5 from 'md5'
 require('dotenv').config()
 
 let mainWindow // 将 mainWindow 声明为全局变量
@@ -102,27 +104,36 @@ ipcMain.handle('get-api-key', () => {
   return process.env.API_KEY
 })
 
-// fetch audio
-ipcMain.handle('play', async (event, text, nation, gender) => {
+// 音频播放请求
+ipcMain.handle('play', async (event, text) => {
   try {
-    const response = await axios.get(
-      `https://texttospeech.responsivevoice.org/v1/text:synthesize`,
-      {
-        params: {
-          text: text,
-          lang: `en-${nation}`,
-          engine: 'g1',
-          pitch: 0.5,
-          rate: 0.5,
-          volume: 1,
-          key: 'SYtdTdUZ',
-          gender: gender
-        },
-        responseType: 'arraybuffer' // 用于返回音频数据
-      }
-    )
-    return response.data
+    const fileName = md5(text)
+    const cachePath = path.join(__dirname, '../../cache', `${fileName}.mp3`)
+    if (fs.existsSync(cachePath)) {
+      return fs.readFileSync(cachePath)
+    }
+    const url = 'https://api.play.ht/api/v2/tts/stream'
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'audio/mpeg', // 接受音频格式
+        'content-type': 'application/json', // 请求体类型为JSON
+        AUTHORIZATION: `Bearer ${process.env.PLAY_KEY}`,
+        'X-USER-ID': process.env.USER_ID
+      },
+      body: JSON.stringify({
+        voice:
+          's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
+        output_format: 'mp3',
+        text: text // 使用传递的文本
+      })
+    }
+    const res = await fetch(url, options)
+    const audioData = await res.arrayBuffer() // 获取音频流数据
+    fs.writeFileSync(cachePath, Buffer.from(audioData))
+    return audioData
   } catch (error) {
-    console.error('TTS request error:', error.message, error.response?.status, error.response?.data)
+    console.error('TTS request error:', error.message)
+    return null
   }
 })
